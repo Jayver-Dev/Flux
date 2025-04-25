@@ -341,6 +341,32 @@ VisualsTab:CreateToggle({
     end
 })
 
+-- Third Person Toggle
+local thirdPersonEnabled = false
+local thirdPersonDistance = 10
+
+RunService.RenderStepped:Connect(function()
+    if thirdPersonEnabled then
+        Camera.CameraSubject = LocalPlayer.Character.Humanoid
+        Camera.CameraType = Enum.CameraType.Scriptable
+        local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            local behind = root.CFrame.Position - root.CFrame.LookVector * thirdPersonDistance + Vector3.new(0, 2, 0)
+            Camera.CFrame = CFrame.new(behind, root.Position + Vector3.new(0, 2, 0))
+        end
+    end
+end)
+
+VisualsTab:CreateToggle({
+    Name = "Third Person View",
+    CurrentValue = false,
+    Callback = function(val)
+        thirdPersonEnabled = val
+        Camera.CameraType = val and Enum.CameraType.Scriptable or Enum.CameraType.Custom
+    end
+})
+
+
 
 -- Load config
 Luna:LoadAutoloadConfig()
