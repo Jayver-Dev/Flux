@@ -366,7 +366,298 @@ VisualsTab:CreateToggle({
     end
 })
 
+-- Radar Configuration
+local radarEnabled = true
+local radarSize = 150
+local radarPosition = Vector2.new(50, 50)
+local radarMaxDistance = 500
+local radarTeamCheck = false
+local radarPlayerDots = {}
+local radarFrame = Drawing.new("Square")
+local localPlayerDot = Drawing.new("Circle")
 
+-- Initialize Radar Frame
+radarFrame.Filled = true
+radarFrame.Transparency = 0.4
+radarFrame.Color = Color3.fromRGB(20, 20, 20)
+radarFrame.Position = radarPosition
+radarFrame.Size = Vector2.new(radarSize, radarSize)
+radarFrame.Visible = false
+
+-- Initialize Local Player Dot
+localPlayerDot.Radius = 3
+localPlayerDot.Filled = true
+localPlayerDot.Color = Color3.fromRGB(255, 255, 255)
+localPlayerDot.Visible = false
+
+-- Radar Update Logic
+RunService.RenderStepped:Connect(function()
+    -- Cleanup previous dots
+    for _, dot in pairs(radarPlayerDots) do
+        dot.Visible = false
+    end
+
+    if not radarEnabled then
+        radarFrame.Visible = false
+        localPlayerDot.Visible = false
+        return
+    end
+
+    radarFrame.Visible = true
+
+    local lpCharacter = LocalPlayer.Character
+    if not lpCharacter or not lpCharacter:FindFirstChild("HumanoidRootPart") then return end
+    local lpHRP = lpCharacter.HumanoidRootPart
+    local forward = lpHRP.CFrame.LookVector
+
+    -- Draw local player dot in center
+    localPlayerDot.Position = radarFrame.Position + Vector2.new(radarSize / 2, radarSize / 2)
+    localPlayerDot.Visible = true
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if radarTeamCheck and player.Team == LocalPlayer.Team then continue end
+
+            local hrp = player.Character.HumanoidRootPart
+            local offset = hrp.Position - lpHRP.Position
+            local distance = offset.Magnitude
+            if distance > radarMaxDistance then continue end
+
+            local relative = Vector3.new(offset.X, 0, offset.Z)
+            local angle = math.atan2(forward.X, forward.Z)
+            local rotatedX = relative.X * math.cos(-angle) - relative.Z * math.sin(-angle)
+            local rotatedZ = relative.X * math.sin(-angle) + relative.Z * math.cos(-angle)
+
+            local scaledX = math.clamp(rotatedX / radarMaxDistance * (radarSize / 2), -radarSize / 2, radarSize / 2)
+            local scaledY = math.clamp(rotatedZ / radarMaxDistance * (radarSize / 2), -radarSize / 2, radarSize / 2)
+
+            local dot = radarPlayerDots[player] or Drawing.new("Circle")
+            dot.Position = radarFrame.Position + Vector2.new(radarSize / 2 + scaledX, radarSize / 2 + scaledY)
+            dot.Radius = 3
+            dot.Filled = true
+            dot.Color = radarTeamCheck and player.TeamColor.Color or Color3.fromRGB(255, 0, 0)
+            dot.Visible = true
+
+            radarPlayerDots[player] = dot
+        end
+    end
+end)
+
+
+VisualsTab:CreateToggle({
+    Name = "Enable Radar",
+    CurrentValue = true,
+    Callback = function(value)
+        radarEnabled = value
+    end
+})
+
+VisualsTab:CreateSlider({
+    Name = "Radar Size",
+    Range = {100, 300},
+    Increment = 10,
+    CurrentValue = 150,
+    Callback = function(value)
+        radarSize = value
+        radarFrame.Size = Vector2.new(value, value)
+    end
+})
+
+VisualsTab:CreateSlider({
+    Name = "Radar Range",
+    Range = {100, 1000},
+    Increment = 50,
+    CurrentValue = 500,
+    Callback = function(value)
+        radarMaxDistance = value
+    end
+})
+
+VisualsTab:CreateToggle({
+    Name = "Radar Team Check",
+    CurrentValue = false,
+    Callback = function(value)
+        radarTeamCheck = value
+    end
+})
+
+-- Create Movement Tab
+local MovementTab = Window:CreateTab({ Name = "Movement", Icon = "directions_walk", ImageSource = "Material", ShowTitle = true })
+MovementTab:CreateSection("Movement Features")
+
+-- Services and Player Setup
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Flight Mode
+local flying = false
+local flySpeed = 100
+local maxFlySpeed = 1000
+local speedIncrement = 0.4
+local originalGravity = workspace.Gravity
+
+-- Noclip & Infinite Jump
+local noclipEnabled = false
+local infiniteJumpEnabled = false
+local InfJumpConnection = nil
+
+-- Update Character on Respawn
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    Humanoid = Character:WaitForChild("Humanoid")
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+end)
+
+-- Randomized Speed Function
+local function randomizeValue(value, range)
+    return value + (value * (math.random(-range, range) / 100))
+end
+
+-- Flight Logic
+local function fly()
+    while flying do
+        local MoveDirection = Vector3.new()
+        local cameraCFrame = workspace.CurrentCamera.CFrame
+
+        MoveDirection = MoveDirection + (UserInputService:IsKeyDown(Enum.KeyCode.W) and cameraCFrame.LookVector or Vector3.new())
+        MoveDirection = MoveDirection - (UserInputService:IsKeyDown(Enum.KeyCode.S) and cameraCFrame.LookVector or Vector3.new())
+        MoveDirection = MoveDirection - (UserInputService:IsKeyDown(Enum.KeyCode.A) and cameraCFrame.RightVector or Vector3.new())
+        MoveDirection = MoveDirection + (UserInputService:IsKeyDown(Enum.KeyCode.D) and cameraCFrame.RightVector or Vector3.new())
+        MoveDirection = MoveDirection + (UserInputService:IsKeyDown(Enum.KeyCode.Space) and Vector3.new(0, 1, 0) or Vector3.new())
+        MoveDirection = MoveDirection - (UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and Vector3.new(0, 1, 0) or Vector3.new())
+
+        if MoveDirection.Magnitude > 0 then
+            flySpeed = math.min(flySpeed + speedIncrement, maxFlySpeed) 
+            MoveDirection = MoveDirection.Unit * math.min(randomizeValue(flySpeed, 10), maxFlySpeed)
+            HumanoidRootPart.Velocity = MoveDirection * 0.5
+        else
+            HumanoidRootPart.Velocity = Vector3.new(0, 0, 0) 
+        end
+
+        RunService.RenderStepped:Wait() 
+    end
+end
+
+-- Toggle Flight
+local function toggleFlightMode()
+    flying = not flying
+    if flying then
+        workspace.Gravity = 0
+        fly()
+    else
+        flySpeed = 100
+        HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+        workspace.Gravity = originalGravity
+    end
+end
+
+-- Toggle Noclip
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+end
+
+-- Toggle Infinite Jump
+local function toggleInfiniteJump()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+
+    if infiniteJumpEnabled then
+        InfJumpConnection = UserInputService.JumpRequest:Connect(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
+    elseif InfJumpConnection then
+        InfJumpConnection:Disconnect()
+        InfJumpConnection = nil
+    end
+end
+
+-- Noclip + Flight in RenderStepped
+RunService.RenderStepped:Connect(function()
+    if noclipEnabled and Character then
+        for _, part in ipairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- UI Toggles
+MovementTab:CreateToggle({
+    Name = "Flight Mode",
+    CurrentValue = false,
+    Callback = function(v)
+        toggleFlightMode()
+    end
+})
+
+MovementTab:CreateSlider({
+    Name = "Flight Speed",
+    Range = {50, 200},
+    Increment = 10,
+    CurrentValue = flySpeed,
+    Callback = function(val)
+        flySpeed = val
+    end
+})
+
+MovementTab:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Callback = function(v)
+        toggleNoclip()
+    end
+})
+
+MovementTab:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Callback = function(v)
+        toggleInfiniteJump()
+    end
+})
+
+
+-- Speed Slider
+local currentSpeed = 16
+
+MovementTab:CreateSlider({
+    Name = "Walk Speed",
+    Range = {16, 200},
+    Increment = 1,
+    CurrentValue = currentSpeed,
+    Callback = function(value)
+        currentSpeed = value
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = value
+        end
+    end
+})
+
+-- Jump Power Slider
+local currentJumpPower = 50
+
+MovementTab:CreateSlider({
+    Name = "Jump Power",
+    Range = {50, 200},
+    Increment = 1,
+    CurrentValue = currentJumpPower,
+    Callback = function(value)
+        currentJumpPower = value
+        local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = value
+        end
+    end
+})
 
 -- Load config
 Luna:LoadAutoloadConfig()
