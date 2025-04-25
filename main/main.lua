@@ -3,7 +3,7 @@ local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-S
 
 -- Create Main Window
 local Window = Luna:CreateWindow({
-    Name = "Laker Hub",
+    Name = "Kurt Cobain,
     Subtitle = "Kurt Cobain POV",
     LoadingEnabled = true,
     LoadingTitle = "Laker Hub",
