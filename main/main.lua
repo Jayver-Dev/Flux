@@ -283,7 +283,7 @@ local function drawESP(target)
             healthBar.From = Vector2.new(barX - 6, barY + barHeight * (1 - healthRatio))
             healthBar.To = Vector2.new(barX - 6, barY + barHeight)
             healthBar.Thickness = 3
-            healthBar.Color = Color3.fromRGB(0, 0, 255)
+            healthBar.Color = Color3.fromRGB(0, 255, 0)
             healthBar.Visible = true
             table.insert(drawings, healthBar)
         end
