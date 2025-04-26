@@ -848,38 +848,38 @@ Tab:CreateSlider{
 -- =======================
 
 -- Bullet Tracer Lines
-VisualsTab:CreateToggle{
+VisualsTab:CreateToggle({
     Name = "Bullet Tracer Lines",
     Default = false,
     Callback = function(Value)
         getgenv().BulletTracersEnabled = Value
     end
-}
+})
 
-VisualsTab:CreateColorpicker{
+VisualsTab:CreateColorpicker({
     Name = "Bullet Tracer Color",
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(Value)
         getgenv().BulletTracerColor = Value
     end
-}
+})
 
 -- Bullet Impact Markers
-VisualsTab:CreateToggle{
+VisualsTab:CreateToggle({
     Name = "Bullet Impact Markers",
     Default = false,
     Callback = function(Value)
         getgenv().ImpactMarkersEnabled = Value
     end
-}
+})
 
-VisualsTab:CreateColorpicker{
+VisualsTab:CreateColorpicker({
     Name = "Impact Marker Color",
     Default = Color3.fromRGB(255, 255, 0),
     Callback = function(Value)
         getgenv().ImpactMarkerColor = Value
     end
-}
+})
 
 -- =======================
 -- **Backend Logic**
