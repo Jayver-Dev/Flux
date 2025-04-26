@@ -805,7 +805,7 @@ Tab:CreateToggle({
 -- =======================
 
 -- Instant Hit Toggle
-Tab:Toggle{
+Tab:CreateToggle{
     Name = "Instant Hit",
     Default = false,
     Callback = function(Value)
@@ -814,7 +814,7 @@ Tab:Toggle{
 }
 
 -- Silent Aim FOV Slider
-Tab:Slider{
+Tab:CreateSlider{
     Name = "Silent Aim FOV Radius",
     Min = 10,
     Max = 500,
@@ -825,7 +825,7 @@ Tab:Slider{
 }
 
 -- Advanced Triggerbot
-Tab:Toggle{
+Tab:CreateToggle{
     Name = "Enable Advanced Triggerbot",
     Default = false,
     Callback = function(Value)
@@ -833,7 +833,7 @@ Tab:Toggle{
     end
 }
 
-Tab:Slider{
+Tab:CreateSlider{
     Name = "Triggerbot Hit Chance (%)",
     Min = 1,
     Max = 100,
@@ -848,7 +848,7 @@ Tab:Slider{
 -- =======================
 
 -- Bullet Tracer Lines
-VisualTab:Toggle{
+VisualTab:CreateToggle{
     Name = "Bullet Tracer Lines",
     Default = false,
     Callback = function(Value)
@@ -856,7 +856,7 @@ VisualTab:Toggle{
     end
 }
 
-VisualTab:Colorpicker{
+VisualTab:CreateColorpicker{
     Name = "Bullet Tracer Color",
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(Value)
@@ -865,7 +865,7 @@ VisualTab:Colorpicker{
 }
 
 -- Bullet Impact Markers
-VisualTab:Toggle{
+VisualTab:CreateToggle{
     Name = "Bullet Impact Markers",
     Default = false,
     Callback = function(Value)
@@ -873,7 +873,7 @@ VisualTab:Toggle{
     end
 }
 
-VisualTab:Colorpicker{
+VisualTab:CreateColorpicker{
     Name = "Impact Marker Color",
     Default = Color3.fromRGB(255, 255, 0),
     Callback = function(Value)
