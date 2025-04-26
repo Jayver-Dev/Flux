@@ -660,6 +660,131 @@ MovementTab:CreateSlider({
     end
 })
 
+-- Silent Aim Settings
+local silentAimEnabled = false
+local silentAimHitChance = 100
+local silentAimFOV = 150
+local silentAimTeamCheck = true
+local silentAimWallCheck = true
+local targetPart = "Head"
+
+local CurrentTarget
+
+-- Get Closest Target
+local function getClosestTarget()
+    local closestPlayer
+    local shortestDistance = math.huge
+
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(targetPart) then
+            if silentAimTeamCheck and player.Team == LocalPlayer.Team then
+                continue
+            end
+
+            local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character[targetPart].Position)
+            if onScreen then
+                local mousePos = UserInputService:GetMouseLocation()
+                local distance = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
+
+                if distance < silentAimFOV then
+                    if silentAimWallCheck then
+                        local rayParams = RaycastParams.new()
+                        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+                        rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+
+                        local result = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (player.Character[targetPart].Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000, rayParams)
+                        if result and result.Instance and not player.Character:IsAncestorOf(result.Instance) then
+                            continue -- wall detected
+                        end
+                    end
+
+                    if distance < shortestDistance then
+                        shortestDistance = distance
+                        closestPlayer = player
+                    end
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+-- Metamethod Hook
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+
+    if silentAimEnabled and CurrentTarget and CurrentTarget.Character and CurrentTarget.Character:FindFirstChild(targetPart) then
+        if method == "Raycast" or method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
+            if math.random(0,100) <= silentAimHitChance then
+                local targetPos = CurrentTarget.Character[targetPart].Position
+                local origin = args[1]
+                local direction = (targetPos - origin).Unit * 500
+
+                args[2] = direction
+                return oldNamecall(self, unpack(args))
+            end
+        end
+    end
+
+    return oldNamecall(self, ...)
+end)
+setreadonly(mt, true)
+
+-- Update Target
+RunService.RenderStepped:Connect(function()
+    CurrentTarget = getClosestTarget()
+end)
+
+-- Luna UI Integration
+Tab:CreateToggle({
+    Name = "Silent Aim",
+    CurrentValue = false,
+    Callback = function(v)
+        silentAimEnabled = v
+    end
+})
+
+Tab:CreateSlider({
+    Name = "Silent Aim Hit Chance",
+    Range = {50, 100},
+    Increment = 1,
+    CurrentValue = silentAimHitChance,
+    Callback = function(v)
+        silentAimHitChance = v
+    end
+})
+
+Tab:CreateSlider({
+    Name = "Silent Aim FOV",
+    Range = {50, 500},
+    Increment = 5,
+    CurrentValue = silentAimFOV,
+    Callback = function(v)
+        silentAimFOV = v
+    end
+})
+
+Tab:CreateToggle({
+    Name = "Silent Aim Team Check",
+    CurrentValue = true,
+    Callback = function(v)
+        silentAimTeamCheck = v
+    end
+})
+
+Tab:CreateToggle({
+    Name = "Silent Aim Wall Check",
+    CurrentValue = true,
+    Callback = function(v)
+        silentAimWallCheck = v
+    end
+})
 
 
 -- Load config
