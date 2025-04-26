@@ -848,7 +848,7 @@ Tab:CreateSlider{
 -- =======================
 
 -- Bullet Tracer Lines
-VisualTab:CreateToggle{
+VisualsTab:CreateToggle{
     Name = "Bullet Tracer Lines",
     Default = false,
     Callback = function(Value)
@@ -856,7 +856,7 @@ VisualTab:CreateToggle{
     end
 }
 
-VisualTab:CreateColorpicker{
+VisualsTab:CreateColorpicker{
     Name = "Bullet Tracer Color",
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(Value)
@@ -865,7 +865,7 @@ VisualTab:CreateColorpicker{
 }
 
 -- Bullet Impact Markers
-VisualTab:CreateToggle{
+VisualsTab:CreateToggle{
     Name = "Bullet Impact Markers",
     Default = false,
     Callback = function(Value)
@@ -873,7 +873,7 @@ VisualTab:CreateToggle{
     end
 }
 
-VisualTab:CreateColorpicker{
+VisualsTab:CreateColorpicker{
     Name = "Impact Marker Color",
     Default = Color3.fromRGB(255, 255, 0),
     Callback = function(Value)
@@ -949,6 +949,51 @@ game:GetService("RunService").Heartbeat:Connect(function()
         end)
     end
 end)
+
+MovementTab:CreateToggle{
+    Name = "Gravity Control",
+    Default = false,
+    Callback = function(Value)
+        getgenv().GravityControlEnabled = Value
+        if Value then
+            workspace.Gravity = 10 -- change this value as needed for a lower gravity
+        else
+            workspace.Gravity = 196.2 -- default gravity
+        end
+    end
+}
+
+MovementTab:CreateSlider{
+    Name = "Gravity Strength",
+    Min = 1,
+    Max = 50,
+    Default = 10,
+    Callback = function(Value)
+        if getgenv().GravityControlEnabled then
+            workspace.Gravity = Value
+        end
+    end
+}
+
+MovementTab:CreateToggle{
+    Name = "Enable Teleportation",
+    Default = false,
+    Callback = function(Value)
+        getgenv().TeleportEnabled = Value
+    end
+}
+
+MovementTab:CreateBind{
+    Name = "Teleport Key",
+    Default = Enum.KeyCode.LeftCtrl,
+    Callback = function()
+        if getgenv().TeleportEnabled then
+            local mousePos = game:GetService("Players").LocalPlayer:GetMouse().Hit.Position
+            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(mousePos)
+        end
+    end
+}
+
 
 -- Load config
 Luna:LoadAutoloadConfig()
