@@ -805,7 +805,7 @@ Tab:CreateToggle({
 -- =======================
 
 -- Instant Hit Toggle
-Tab:CreateToggle{
+local instanthittoggle = Tab:CreateToggle{
     Name = "Instant Hit",
     Default = false,
     Callback = function(Value)
