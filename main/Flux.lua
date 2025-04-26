@@ -660,130 +660,144 @@ MovementTab:CreateSlider({
     end
 })
 
--- Silent Aim Settings
-local silentAimEnabled = false
-local silentAimHitChance = 100
-local silentAimFOV = 150
-local silentAimTeamCheck = true
-local silentAimWallCheck = true
-local targetPart = "Head"
+local SilentAimEnabled = false
+local SilentAimFOV = 150
+local SilentAimHitChance = 100
+local SilentAimTargetPart = "Head"
+local SilentAimTeamCheck = true
+local SilentAimWallCheck = true
 
-local CurrentTarget
+local CurrentTarget = nil
+local HighlightFolder = Instance.new("Folder", game.CoreGui)
+HighlightFolder.Name = "SilentAimHighlights"
 
--- Get Closest Target
-local function getClosestTarget()
-    local closestPlayer
-    local shortestDistance = math.huge
+local function GetClosestPlayer()
+    local players = game:GetService("Players"):GetPlayers()
+    local camera = workspace.CurrentCamera
+    local closest = nil
+    local closestDist = SilentAimFOV
 
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(targetPart) then
-            if silentAimTeamCheck and player.Team == LocalPlayer.Team then
+    for _, player in ipairs(players) do
+        if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if SilentAimTeamCheck and player.Team == game.Players.LocalPlayer.Team then
                 continue
             end
 
-            local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character[targetPart].Position)
+            local pos, onScreen = camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
             if onScreen then
-                local mousePos = UserInputService:GetMouseLocation()
-                local distance = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
-
-                if distance < silentAimFOV then
-                    if silentAimWallCheck then
-                        local rayParams = RaycastParams.new()
-                        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-                        rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
-
-                        local result = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (player.Character[targetPart].Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000, rayParams)
-                        if result and result.Instance and not player.Character:IsAncestorOf(result.Instance) then
-                            continue -- wall detected
+                local mousePos = game:GetService("UserInputService"):GetMouseLocation()
+                local dist = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
+                if dist < closestDist then
+                    if SilentAimWallCheck then
+                        local ray = workspace:Raycast(camera.CFrame.Position, (player.Character.HumanoidRootPart.Position - camera.CFrame.Position).Unit * 999, {game.Players.LocalPlayer.Character})
+                        if ray and ray.Instance and not player.Character:IsAncestorOf(ray.Instance) then
+                            continue
                         end
                     end
-
-                    if distance < shortestDistance then
-                        shortestDistance = distance
-                        closestPlayer = player
-                    end
+                    closestDist = dist
+                    closest = player
                 end
             end
         end
     end
 
-    return closestPlayer
+    return closest
 end
 
--- Metamethod Hook
-local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
-setreadonly(mt, false)
+-- Update Highlight
+local function UpdateHighlight(target)
+    HighlightFolder:ClearAllChildren()
+    if target and target.Character then
+        local highlight = Instance.new("Highlight")
+        highlight.Parent = HighlightFolder
+        highlight.Adornee = target.Character
+        highlight.FillColor = Color3.fromRGB(255, 0, 0)
+        highlight.FillTransparency = 0.5
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.OutlineTransparency = 0
+    end
+end
 
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-
-    if silentAimEnabled and CurrentTarget and CurrentTarget.Character and CurrentTarget.Character:FindFirstChild(targetPart) then
-        if method == "Raycast" or method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
-            if math.random(0,100) <= silentAimHitChance then
-                local targetPos = CurrentTarget.Character[targetPart].Position
-                local origin = args[1]
-                local direction = (targetPos - origin).Unit * 500
-
-                args[2] = direction
-                return oldNamecall(self, unpack(args))
+-- Hook shot detection
+local oldIndex
+oldIndex = hookmetamethod(game, "__index", function(self, key)
+    if SilentAimEnabled and tostring(self) == "Mouse" and (key == "Hit" or key == "Target") then
+        if math.random(0,100) <= SilentAimHitChance then
+            local target = GetClosestPlayer()
+            if target and target.Character and target.Character:FindFirstChild(SilentAimTargetPart) then
+                UpdateHighlight(target)
+                CurrentTarget = target
+                return target.Character[SilentAimTargetPart].CFrame
             end
         end
     end
-
-    return oldNamecall(self, ...)
-end)
-setreadonly(mt, true)
-
--- Update Target
-RunService.RenderStepped:Connect(function()
-    CurrentTarget = getClosestTarget()
+    return oldIndex(self, key)
 end)
 
--- Luna UI Integration
+-- Main Loop
+game:GetService("RunService").RenderStepped:Connect(function()
+    if SilentAimEnabled then
+        local target = GetClosestPlayer()
+        if target ~= CurrentTarget then
+            UpdateHighlight(target)
+            CurrentTarget = target
+        end
+    else
+        HighlightFolder:ClearAllChildren()
+    end
+end)
+
 Tab:CreateToggle({
     Name = "Silent Aim",
     CurrentValue = false,
-    Callback = function(v)
-        silentAimEnabled = v
-    end
-})
-
-Tab:CreateSlider({
-    Name = "Silent Aim Hit Chance",
-    Range = {50, 100},
-    Increment = 1,
-    CurrentValue = silentAimHitChance,
-    Callback = function(v)
-        silentAimHitChance = v
-    end
+    Callback = function(Value)
+        SilentAimEnabled = Value
+    end,
 })
 
 Tab:CreateSlider({
     Name = "Silent Aim FOV",
-    Range = {50, 500},
-    Increment = 5,
-    CurrentValue = silentAimFOV,
-    Callback = function(v)
-        silentAimFOV = v
-    end
+    Range = {0, 500},
+    Increment = 1,
+    CurrentValue = 150,
+    Callback = function(Value)
+        SilentAimFOV = Value
+    end,
+})
+
+Tab:CreateSlider({
+    Name = "Hit Chance %",
+    Range = {0, 100},
+    Increment = 1,
+    CurrentValue = 100,
+    Callback = function(Value)
+        SilentAimHitChance = Value
+    end,
+})
+
+Tab:CreateDropdown({
+    Name = "Silent Aim Target Part",
+    Options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso"},
+    CurrentOption = "Head",
+    Callback = function(Value)
+        SilentAimTargetPart = Value
+    end,
 })
 
 Tab:CreateToggle({
     Name = "Silent Aim Team Check",
     CurrentValue = true,
-    Callback = function(v)
-        silentAimTeamCheck = v
-    end
+    Callback = function(Value)
+        SilentAimTeamCheck = Value
+    end,
 })
 
 Tab:CreateToggle({
     Name = "Silent Aim Wall Check",
     CurrentValue = true,
-    Callback = function(v)
-        silentAimWallCheck = v
-    end
+    Callback = function(Value)
+        SilentAimWallCheck = Value
+    end,
 })
 
 
