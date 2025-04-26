@@ -856,7 +856,7 @@ local bullettracerlines = VisualsTab:CreateToggle({
     end
 })
 
-local bullettracercolorpicker = VisualsTab:CreateColorpicker({
+local bullettracercolorpicker = VisualsTab:CreateColorPicker({
     Name = "Bullet Tracer Color",
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(Value)
@@ -873,7 +873,7 @@ local bulletimpactmarkers = VisualsTab:CreateToggle({
     end
 })
 
-local impactmarkercolor = VisualsTab:CreateColorpicker({
+local impactmarkercolor = VisualsTab:CreateColorPicker({
     Name = "Impact Marker Color",
     Default = Color3.fromRGB(255, 255, 0),
     Callback = function(Value)
