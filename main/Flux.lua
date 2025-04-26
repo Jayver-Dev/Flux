@@ -3,12 +3,13 @@ local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-S
 
 -- Create Main Window
 local Window = Luna:CreateWindow({
-    Name = "Laker Hub",
-    Subtitle = "Kurt Cobain POV",
+    Name = "Flux",
+    Subtitle = "Flux on crack",
+    LogoID = "116511775321501",
     LoadingEnabled = true,
-    LoadingTitle = "Laker Hub",
+    LoadingTitle = "Flux Hub",
     LoadingSubtitle = "by @j4y11",
-    ConfigSettings = { ConfigFolder = "Laker Hub" }
+    ConfigSettings = { ConfigFolder = "Flux Hub" }
 })
 
 -- Create Tab
