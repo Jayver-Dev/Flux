@@ -800,6 +800,155 @@ Tab:CreateToggle({
     end,
 })
 
+-- =======================
+-- **Main Tab Additions (Combat Section)**
+-- =======================
+
+-- Instant Hit Toggle
+Tab:Toggle{
+    Name = "Instant Hit",
+    Default = false,
+    Callback = function(Value)
+        getgenv().InstantHit = Value
+    end
+}
+
+-- Silent Aim FOV Slider
+Tab:Slider{
+    Name = "Silent Aim FOV Radius",
+    Min = 10,
+    Max = 500,
+    Default = 150,
+    Callback = function(Value)
+        getgenv().SilentAimFOV = Value
+    end
+}
+
+-- Advanced Triggerbot
+Tab:Toggle{
+    Name = "Enable Advanced Triggerbot",
+    Default = false,
+    Callback = function(Value)
+        getgenv().AdvancedTriggerbotEnabled = Value
+    end
+}
+
+Tab:Slider{
+    Name = "Triggerbot Hit Chance (%)",
+    Min = 1,
+    Max = 100,
+    Default = 80,
+    Callback = function(Value)
+        getgenv().TriggerbotHitChance = Value
+    end
+}
+
+-- =======================
+-- **Visual Tab Additions (Drawing Section)**
+-- =======================
+
+-- Bullet Tracer Lines
+VisualTab:Toggle{
+    Name = "Bullet Tracer Lines",
+    Default = false,
+    Callback = function(Value)
+        getgenv().BulletTracersEnabled = Value
+    end
+}
+
+VisualTab:Colorpicker{
+    Name = "Bullet Tracer Color",
+    Default = Color3.fromRGB(255, 0, 0),
+    Callback = function(Value)
+        getgenv().BulletTracerColor = Value
+    end
+}
+
+-- Bullet Impact Markers
+VisualTab:Toggle{
+    Name = "Bullet Impact Markers",
+    Default = false,
+    Callback = function(Value)
+        getgenv().ImpactMarkersEnabled = Value
+    end
+}
+
+VisualTab:Colorpicker{
+    Name = "Impact Marker Color",
+    Default = Color3.fromRGB(255, 255, 0),
+    Callback = function(Value)
+        getgenv().ImpactMarkerColor = Value
+    end
+}
+
+-- =======================
+-- **Backend Logic**
+-- =======================
+
+-- Instant Hit Logic
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().InstantHit then
+        -- Assuming you have a function that handles shooting bullets
+        -- instantly hit the target with a bullet (adjust target detection logic)
+        if target then
+            bullet.Position = target.Position -- instant hit
+        end
+    end
+end)
+
+-- Silent Aim Logic
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().SilentAimFOV and target then
+        -- Silent aim: check if target is within the FOV and lock bullet
+        local targetDistance = (target.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+        if targetDistance <= getgenv().SilentAimFOV then
+            -- lock the bullet to the target
+            -- (implement your actual bullet tracking logic here)
+        end
+    end
+end)
+
+-- Advanced Triggerbot Logic
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().AdvancedTriggerbotEnabled then
+        -- Example: Triggerbot shoots if hit chance is met
+        local chance = math.random(1, 100)
+        if chance <= getgenv().TriggerbotHitChance then
+            -- shoot (triggerbot activation logic)
+        end
+    end
+end)
+
+-- Bullet Tracer Lines Logic
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().BulletTracersEnabled then
+        -- Assuming you have logic to track bullet position (shooting)
+        local tracer = Drawing.new("Line")
+        tracer.Color = getgenv().BulletTracerColor
+        tracer.Thickness = 2
+        tracer.From = bulletStart.Position
+        tracer.To = bulletEnd.Position
+        tracer.Visible = true
+        task.delay(0.5, function()
+            tracer:Remove()  -- remove tracer after 0.5 seconds
+        end)
+    end
+end)
+
+-- Bullet Impact Markers Logic
+game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().ImpactMarkersEnabled then
+        -- Example impact position (adjust to match your game logic)
+        local marker = Drawing.new("Circle")
+        marker.Color = getgenv().ImpactMarkerColor
+        marker.Position = impactPosition  -- Assuming you have this value
+        marker.Radius = 5
+        marker.Visible = true
+        task.delay(1, function()
+            marker:Remove()  -- remove marker after 1 second
+        end)
+    end
+end)
 
 -- Load config
 Luna:LoadAutoloadConfig()
