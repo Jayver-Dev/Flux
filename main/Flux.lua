@@ -972,94 +972,136 @@ MovementTab:CreateBind{
     end
 }
 
+--// Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+--// Variables
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local flyEnabled = false
-local flySpeed = 50 -- Default speed
-local bodyGyro, bodyVelocity
+local flySpeed = 100
+local maxFlySpeed = 1000
+local speedIncrement = 0.4
+local originalGravity = Workspace.Gravity
+local flyConnection
+
+--// Character Respawn Handler
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+end)
+
+--// Helper Functions
+local function randomizeValue(value, range)
+    return value + (value * (math.random(-range, range) / 100))
+end
 
 local function startFly()
-    local Character = game.Players.LocalPlayer.Character
-    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-    local Humanoid = Character and Character:FindFirstChild("Humanoid")
+    if flyConnection then flyConnection:Disconnect() end
 
-    if not (Character and HumanoidRootPart and Humanoid) then return end
-
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.P = 9e4
-    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-    bodyGyro.CFrame = HumanoidRootPart.CFrame
-    bodyGyro.Parent = HumanoidRootPart
-
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.Velocity = Vector3.new(0,0,0)
-    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-    bodyVelocity.Parent = HumanoidRootPart
-
-    Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-
-    game:GetService("RunService").RenderStepped:Connect(function()
+    flyConnection = RunService.RenderStepped:Connect(function()
         if not flyEnabled then return end
+        if not HumanoidRootPart then return end
 
-        local camera = workspace.CurrentCamera
-        local moveVec = Vector3.zero
-        local UIS = game:GetService("UserInputService")
+        local MoveDirection = Vector3.new()
+        local Camera = Workspace.CurrentCamera
+        local CameraCFrame = Camera.CFrame
 
-        if UIS:IsKeyDown(Enum.KeyCode.W) then
-            moveVec += camera.CFrame.LookVector
+        -- Controls
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            MoveDirection = MoveDirection + CameraCFrame.LookVector
         end
-        if UIS:IsKeyDown(Enum.KeyCode.S) then
-            moveVec -= camera.CFrame.LookVector
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            MoveDirection = MoveDirection - CameraCFrame.LookVector
         end
-        if UIS:IsKeyDown(Enum.KeyCode.A) then
-            moveVec -= camera.CFrame.RightVector
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            MoveDirection = MoveDirection - CameraCFrame.RightVector
         end
-        if UIS:IsKeyDown(Enum.KeyCode.D) then
-            moveVec += camera.CFrame.RightVector
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            MoveDirection = MoveDirection + CameraCFrame.RightVector
         end
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then
-            moveVec += Vector3.new(0,1,0)
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            MoveDirection = MoveDirection + Vector3.new(0, 1, 0)
         end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-            moveVec -= Vector3.new(0,1,0)
-        end
-
-        if moveVec.Magnitude > 0 then
-            moveVec = moveVec.Unit
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            MoveDirection = MoveDirection - Vector3.new(0, 1, 0)
         end
 
-        bodyVelocity.Velocity = moveVec * flySpeed
-        bodyGyro.CFrame = camera.CFrame
+        if MoveDirection.Magnitude > 0 then
+            flySpeed = math.min(FlySettings.Speed + speedIncrement, maxFlySpeed)
+            MoveDirection = MoveDirection.Unit * math.min(randomizeValue(flySpeed, 10), maxFlySpeed)
+            HumanoidRootPart.Velocity = MoveDirection * 0.5
+        else
+            HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+        end
     end)
 end
 
 local function stopFly()
-    if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
-    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
-
-    local Character = game.Players.LocalPlayer.Character
-    local Humanoid = Character and Character:FindFirstChild("Humanoid")
-    if Humanoid then
-        Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
     end
+
+    if HumanoidRootPart then
+        HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+    end
+
+    Workspace.Gravity = originalGravity
+    flySpeed = 100
 end
 
--- 🌙 Luna UI Controls
+--// Luna UI Toggle Example
+_G.FlyToggle = false
 
-MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
+local function toggleFly(state)
+    _G.FlyToggle = state
     flyEnabled = state
+
     if flyEnabled then
+        Workspace.Gravity = 0
         startFly()
     else
         stopFly()
     end
-end)
+end
 
-MovementTab:CreateSlider('Fly Speed (Bypassed)', {
-    min = 10,
-    max = 150,
-    default = 50,
-}, function(value)
-    flySpeed = value
-end)
+--// Example Usage:
+-- Connect this function to your Luna UI toggle button:
+-- ToggleButton.Callback = function(Value) toggleFly(Value) end
+
+local FlySettings = {
+    Enabled = false,
+    Speed = 100
+}
+
+MovementTab:Toggle({
+    Name = "Fly(Bypass)",
+    CurrentValue = false,
+    Flag = "FlyBypass",
+    Callback = function(Value)
+        FlySettings.Enabled = Value
+        toggleFly(Value)
+    end
+})
+
+MovementTab:Slider({
+    Name = "Fly(Bypass) Speed",
+    Range = {50, 1000},
+    Increment = 10,
+    Suffix = "Speed",
+    CurrentValue = 100,
+    Flag = "bypassflyspeed",
+    Callback = function(Value)
+        FlySettings.Speed = Value
+        flySpeed = Value
+    end
+})
+
 
 
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
