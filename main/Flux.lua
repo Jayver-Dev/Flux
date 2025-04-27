@@ -1001,11 +1001,11 @@ end
 
 local MovementTab = Window:Tab("Movement", "directions_walk")
 
-local flyToggle = MovementTab:Toggle("Bypass Fly", false, function(state)
+local flyToggle = MovementTab:Toggle("Fly(Bypass)", false, function(state)
     bypassFly(state)
 end)
 
-local flySpeedSlider = MovementTab:Slider("Fly Speed", {
+local flySpeedSlider = MovementTab:Slider("Fly(bypass) Speed", {
     min = 20,
     max = 300,
     default = 80,
