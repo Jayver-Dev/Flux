@@ -13,7 +13,7 @@ local Window = Luna:CreateWindow({
 })
 
 -- Create Tab
-local Tab = Window:CreateTab({ Name = "Main", Icon = "dashboard", ImageSource = "Material", ShowTitle = true })
+local Tab = Window:CreateTab({ Name = "Main", Icon = "home", ImageSource = "Material", ShowTitle = true })
 Tab:CreateSection("Aimbot")
 
 -- Services
@@ -1116,7 +1116,7 @@ MovementTab:CreateBind{
     end
 }
 
-local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "cog", ImageSource = "Lucide", ShowTitle = true })
+local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
 SettingsTab:BuildThemeSection() -- Tab Should be the name of the tab you are adding this section to.
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
