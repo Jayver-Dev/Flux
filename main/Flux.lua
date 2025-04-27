@@ -915,6 +915,161 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
+MovementTab:CreateSection("Bypasses")
+
+--// Services
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+--// Variables
+local flyEnabled = false
+local hoverEnabled = false
+local flySpeed = 4
+local hoverIntensity = 1
+local flyKey = Enum.KeyCode.H
+
+local movementKeys = {
+    [Enum.KeyCode.W] = false,
+    [Enum.KeyCode.A] = false,
+    [Enum.KeyCode.S] = false,
+    [Enum.KeyCode.D] = false,
+    [Enum.KeyCode.Space] = false,
+    [Enum.KeyCode.LeftControl] = false,
+}
+
+local lastTween -- Store last tween to cancel it if needed
+
+--// Helper
+local function getHRP()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+end
+
+--// Flight + Hover Update
+RunService.Heartbeat:Connect(function(deltaTime)
+    if not flyEnabled then return end
+    local hrp = getHRP()
+    if not hrp then return end
+
+    local moveDir = Vector3.zero
+
+    if movementKeys[Enum.KeyCode.W] then
+        moveDir += Camera.CFrame.LookVector
+    end
+    if movementKeys[Enum.KeyCode.S] then
+        moveDir -= Camera.CFrame.LookVector
+    end
+    if movementKeys[Enum.KeyCode.A] then
+        moveDir -= Camera.CFrame.RightVector
+    end
+    if movementKeys[Enum.KeyCode.D] then
+        moveDir += Camera.CFrame.RightVector
+    end
+    if movementKeys[Enum.KeyCode.Space] then
+        moveDir += Vector3.new(0, 1, 0)
+    end
+    if movementKeys[Enum.KeyCode.LeftControl] then
+        moveDir -= Vector3.new(0, 1, 0)
+    end
+
+    -- Normalize to prevent speed boost diagonally
+    if moveDir.Magnitude > 0 then
+        moveDir = moveDir.Unit
+    end
+
+    local targetPos
+    if moveDir.Magnitude > 0 then
+        -- Move with input
+        targetPos = hrp.Position + moveDir * flySpeed
+    elseif hoverEnabled then
+        -- Hover with sinusoidal up/down
+        local hoverOffset = math.sin(tick() * 2) * (hoverIntensity)
+        targetPos = hrp.Position + Vector3.new(0, hoverOffset, 0)
+    else
+        targetPos = hrp.Position
+    end
+
+    -- Cancel last tween if exists
+    if lastTween then
+        lastTween:Cancel()
+    end
+
+    -- Tween move
+    local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local goal = {CFrame = CFrame.new(targetPos)}
+    local tween = TweenService:Create(hrp, tweenInfo, goal)
+    tween:Play()
+    lastTween = tween
+
+    -- Anti-Detection
+    hrp.Velocity = Vector3.zero
+    hrp.RotVelocity = Vector3.zero
+end)
+
+--// Inputs
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if movementKeys[input.KeyCode] ~= nil then
+        movementKeys[input.KeyCode] = true
+    elseif input.KeyCode == flyKey then
+        flyEnabled = not flyEnabled
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.PlatformStand = flyEnabled
+        end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, processed)
+    if processed then return end
+    if movementKeys[input.KeyCode] ~= nil then
+        movementKeys[input.KeyCode] = false
+    end
+end)
+
+--// Luna UI Setup
+MovementTab:CreateToggle({
+    Name = "Enable Fly",
+    CurrentValue = false,
+    Callback = function(Value)
+        flyEnabled = Value
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.PlatformStand = Value
+        end
+    end
+})
+
+MovementTab:CreateToggle({
+    Name = "Enable Hover Mode",
+    CurrentValue = false,
+    Callback = function(Value)
+        hoverEnabled = Value
+    end
+})
+
+MovementTab:CreateSlider({
+    Name = "Fly Speed",
+    Range = {1, 20},
+    Increment = 1,
+    CurrentValue = flySpeed,
+    Suffix = " Studs/s",
+    Callback = function(Value)
+        flySpeed = Value
+    end
+})
+
+MovementTab:CreateSlider({
+    Name = "Hover Intensity",
+    Range = {0, 5},
+    Increment = 0.1,
+    CurrentValue = hoverIntensity,
+    Suffix = "",
+    Callback = function(Value)
+        hoverIntensity = Value
+    end
+})
 
 
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
