@@ -1092,7 +1092,6 @@ MovementTab:CreateBind{
 
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
-SettingsTab:BuildThemeSection() -- Tab Should be the name of the tab you are adding this section to.
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 
 -- Load config
