@@ -13,7 +13,7 @@ local Window = Luna:CreateWindow({
 })
 
 -- Create Tab
-local Tab = Window:CreateTab({ Name = "Main", Icon = "description", ImageSource = "Material", ShowTitle = true })
+local Tab = Window:CreateTab({ Name = "Main", Icon = "home", ImageSource = "Material", ShowTitle = true })
 Tab:CreateSection("Aimbot")
 
 -- Services
@@ -1026,32 +1026,6 @@ local function createImpactMarker(position)
     impactMarker.Parent = workspace
     game.Debris:AddItem(impactMarker, 2) -- Clean up after 2 seconds
 end
-
--- Function to calculate and handle bullet impact
-local function fireBullet()
-    local startPosition = camera.CFrame.Position
-    local direction = (mouse.Hit.p - startPosition).unit * bulletRange -- The direction in which the bullet will travel
-    
-    -- Raycast to detect the impact position
-    local ray = Ray.new(startPosition, direction)
-    local hit, position = workspace:FindPartOnRay(ray, player.Character, false, true)
-    
-    if hit then
-        -- If the ray hits something, create an impact marker at the hit position
-        createImpactMarker(position)
-        
-        -- Handle the logic for bullet impact (e.g., apply damage, effects, etc.)
-        print("Bullet hit at position: " .. tostring(position))
-    else
-        print("No hit, bullet traveled to max range.")
-    end
-end
-
--- Simulate firing the bullet when the player clicks the mouse
-mouse.Button1Down:Connect(function()
-    fireBullet()
-end)
-
 
 -- Bullet Impact Markers Logic
 game:GetService("RunService").Heartbeat:Connect(function()
