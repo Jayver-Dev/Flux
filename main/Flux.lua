@@ -993,18 +993,20 @@ local function bypassFly(state)
     end
 end
 
+-- Toggle for bypass fly
 local flyToggle = MovementTab:Toggle("Bypass Fly", false, function(state)
     bypassFly(state)
 end)
 
--- Handling sliders properly
+-- Handling sliders properly (ensure the correct value type is used)
 local flySpeedSlider = MovementTab:Slider("Fly(Bypass) Speed", {
     min = 20,
     max = 300,
     default = 80,
 }, function(value)
-    if tonumber(value) then
-        FlySettings.Speed = tonumber(value)
+    -- Ensuring value is a number and not a string
+    if type(value) == "number" then
+        FlySettings.Speed = value
     else
         warn("Fly Speed value is not a valid number: " .. tostring(value))
     end
@@ -1015,8 +1017,9 @@ local flyBoostSlider = MovementTab:Slider("Fly(Bypass) Boost Speed", {
     max = 1000,
     default = 500,
 }, function(value)
-    if tonumber(value) then
-        FlySettings.BoostSpeed = tonumber(value)
+    -- Ensuring value is a number and not a string
+    if type(value) == "number" then
+        FlySettings.BoostSpeed = value
     else
         warn("Fly Boost Speed value is not a valid number: " .. tostring(value))
     end
@@ -1035,6 +1038,7 @@ MovementTab:CreateBind("Flight Keybind", Enum.KeyCode.F, function()
     flying = not flying
     bypassFly(flying) -- Toggle flight on or off
 end)
+
 
 
 
