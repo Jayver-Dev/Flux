@@ -993,31 +993,40 @@ local function bypassFly(state)
     end
 end
 
-local flyToggle = MovementTab:CreateToggle("Fly(Bypass)", false, function(state)
+local flyToggle = MovementTab:CreateToggle("Bypass Fly", false, function(state)
     bypassFly(state)
 end)
 
-local flySpeedSlider = MovementTab:CreateSlider("Fly(Bypass) Speed", {
+-- Handling sliders properly
+local flySpeedSlider = MovementTab:CreateSlider("Fly Speed", {
     min = 20,
     max = 300,
     default = 80,
-}, function(val)
-    FlySettings.Speed = val
+}, function(value)
+    if type(value) == "number" then
+        FlySettings.Speed = value
+    else
+        warn("Fly Speed value is not a valid number: " .. tostring(value))
+    end
 end)
 
-local flyBoostSlider = MovementTab:CreateSlider("Fly(Bypass) Boost Speed", {
+local flyBoostSlider = MovementTab:CreateSlider("Fly Boost Speed", {
     min = 500,
     max = 1000,
     default = 500,
-}, function(val)
-    FlySettings.BoostSpeed = val
+}, function(value)
+    if type(value) == "number" then
+        FlySettings.BoostSpeed = value
+    else
+        warn("Fly Boost Speed value is not a valid number: " .. tostring(value))
+    end
 end)
 
-local flyRandomnessToggle = MovementTab:Toggle("Enable Randomness", true, function(state)
+local flyRandomnessToggle = MovementTab:CreateToggle("Enable Randomness", true, function(state)
     FlySettings.Randomness = state
 end)
 
-local verticalControlToggle = MovementTab:Toggle("Vertical Flight Control", true, function(state)
+local verticalControlToggle = MovementTab:CreateToggle("Vertical Flight Control", true, function(state)
     FlySettings.VerticalControl = state
 end)
 
@@ -1026,6 +1035,7 @@ MovementTab:CreateBind("Flight Keybind", Enum.KeyCode.F, function()
     flying = not flying
     bypassFly(flying) -- Toggle flight on or off
 end)
+
 
 
 
