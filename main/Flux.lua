@@ -999,7 +999,6 @@ local function bypassFly(state)
     end
 end
 
-local MovementTab = Window:Tab("Movement", "directions_walk")
 
 local flyToggle = MovementTab:Toggle("Fly(Bypass)", false, function(state)
     bypassFly(state)
