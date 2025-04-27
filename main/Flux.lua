@@ -1043,7 +1043,7 @@ local function stopFly()
 end
 
 -- 🌙 Luna UI Toggle
-MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
+local flybypassed = MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
     flyEnabled = state
     if flyEnabled then
         startFly()
@@ -1051,7 +1051,7 @@ MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
         stopFly()
     end
 end)
-
+print("attempting to fly")
 
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
