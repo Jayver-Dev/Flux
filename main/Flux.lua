@@ -912,99 +912,92 @@ game:GetService("RunService").Heartbeat:Connect(function()
 end)
 
 
+-- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
+-- Player setup
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
+-- Flight settings
 local flying = false
 local FlySettings = {
     Speed = 80,
-    BoostMultiplier = 2,
-    AntiDetection = true, -- if true, randomizes small movements
+    MaxSpeed = 300,
+    BoostSpeed = 500,
+    Randomness = true,
+    VerticalControl = true,  -- Controls if you can go up and down with flight
+    AntiDetection = true,   -- Toggle for anti-detection
 }
+local originalGravity = workspace.Gravity
 
--- Update when respawning
+-- Update character if respawned
 LocalPlayer.CharacterAdded:Connect(function(char)
     Character = char
     HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 end)
 
+-- Function to apply randomness
+local function randomizeValue(value, range)
+    return value + (value * (math.random(-range, range) / 100))
+end
+
+-- Main bypass flight logic with Anti-Detection
 local function bypassFly(state)
     if state then
         flying = true
+        workspace.Gravity = 0 -- Disable gravity when flying
+        RunService.RenderStepped:Connect(function()
+            if flying then
+                local MoveDirection = Vector3.new()
+                local cameraCFrame = workspace.CurrentCamera.CFrame
 
-        task.spawn(function()
-            while flying do
-                local moveDirection = Vector3.zero
-                local camera = workspace.CurrentCamera.CFrame
+                -- Movement controls (W, A, S, D, Space, Shift)
+                MoveDirection = MoveDirection + (UserInputService:IsKeyDown(Enum.KeyCode.W) and cameraCFrame.LookVector or Vector3.new())
+                MoveDirection = MoveDirection - (UserInputService:IsKeyDown(Enum.KeyCode.S) and cameraCFrame.LookVector or Vector3.new())
+                MoveDirection = MoveDirection - (UserInputService:IsKeyDown(Enum.KeyCode.A) and cameraCFrame.RightVector or Vector3.new())
+                MoveDirection = MoveDirection + (UserInputService:IsKeyDown(Enum.KeyCode.D) and cameraCFrame.RightVector or Vector3.new())
+                MoveDirection = MoveDirection + (UserInputService:IsKeyDown(Enum.KeyCode.Space) and Vector3.new(0, 1, 0) or Vector3.new())
+                MoveDirection = MoveDirection - (UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and Vector3.new(0, 1, 0) or Vector3.new())
 
-                -- Read movement keys
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                    moveDirection += camera.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                    moveDirection -= camera.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                    moveDirection -= camera.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                    moveDirection += camera.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                    moveDirection += Vector3.new(0, 1, 0)
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                    moveDirection -= Vector3.new(0, 1, 0)
+                -- Apply randomness for anti-detection
+                if FlySettings.Randomness then
+                    MoveDirection = MoveDirection.Unit * math.min(randomizeValue(FlySettings.Speed, 10), FlySettings.MaxSpeed)
+                else
+                    MoveDirection = MoveDirection.Unit * FlySettings.Speed
                 end
 
-                -- Normalize move
-                if moveDirection.Magnitude > 0 then
-                    moveDirection = moveDirection.Unit
+                -- Apply vertical control (up/down movement)
+                if FlySettings.VerticalControl then
+                    HumanoidRootPart.Velocity = Vector3.new(MoveDirection.X, MoveDirection.Y, MoveDirection.Z)
+                else
+                    HumanoidRootPart.Velocity = Vector3.new(MoveDirection.X, 0, MoveDirection.Z)
                 end
 
-                -- Boost if holding LeftControl
-                local flySpeed = FlySettings.Speed
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-                    flySpeed *= FlySettings.BoostMultiplier
-                end
-
-                -- Anti detection randomizer
+                -- Anti-detection: Make movement smoother
                 if FlySettings.AntiDetection then
-                    local randomize = Vector3.new(
-                        math.random(-2,2) * 0.01,
-                        math.random(-2,2) * 0.01,
-                        math.random(-2,2) * 0.01
-                    )
-                    moveDirection += randomize
+                    -- Apply a small random delay between changes to make it harder to detect
+                    wait(math.random(0.01, 0.05)) 
                 end
-
-                -- Apply movement
-                if HumanoidRootPart then
-                    HumanoidRootPart.Velocity = moveDirection * flySpeed
-                end
-
-                RunService.RenderStepped:Wait()
+            else
+                -- Stop flight and reset gravity
+                HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                workspace.Gravity = originalGravity
             end
         end)
     else
         flying = false
-        if HumanoidRootPart then
-            HumanoidRootPart.Velocity = Vector3.zero
-        end
     end
 end
-
 
 local flyToggle = MovementTab:CreateToggle("Fly(Bypass)", false, function(state)
     bypassFly(state)
 end)
 
-local flySpeedSlider = MovementTab:CreateSlider("Fly(bypass) Speed", {
+local flySpeedSlider = MovementTab:CreateSlider("Fly(Bypass) Speed", {
     min = 20,
     max = 300,
     default = 80,
@@ -1012,6 +1005,27 @@ local flySpeedSlider = MovementTab:CreateSlider("Fly(bypass) Speed", {
     FlySettings.Speed = val
 end)
 
+local flyBoostSlider = MovementTab:CreateSlider("Fly(Bypass) Boost Speed", {
+    min = 500,
+    max = 1000,
+    default = 500,
+}, function(val)
+    FlySettings.BoostSpeed = val
+end)
+
+local flyRandomnessToggle = MovementTab:Toggle("Enable Randomness", true, function(state)
+    FlySettings.Randomness = state
+end)
+
+local verticalControlToggle = MovementTab:Toggle("Vertical Flight Control", true, function(state)
+    FlySettings.VerticalControl = state
+end)
+
+-- Keybind logic for enabling/disabling flight (using Luna UI's createbind function)
+MovementTab:CreateBind("Flight Keybind", Enum.KeyCode.F, function()
+    flying = not flying
+    bypassFly(flying) -- Toggle flight on or off
+end)
 
 
 
