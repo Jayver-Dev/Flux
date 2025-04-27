@@ -7,9 +7,9 @@ local Window = Luna:CreateWindow({
     Subtitle = "Flux on crack",
     LogoID = "130853116366171",
     LoadingEnabled = true,
-    LoadingTitle = "Flux Hub",
+    LoadingTitle = "Flux",
     LoadingSubtitle = "by @j4y11",
-    ConfigSettings = { ConfigFolder = "Flux Hub" }
+    ConfigSettings = { ConfigFolder = "Flux" }
 })
 
 Window:CreateHomeTab({
