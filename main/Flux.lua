@@ -19,7 +19,7 @@ Window:CreateHomeTab({
 })
 
 -- Create Tab
-local Tab = Window:CreateTab({ Name = "Main", Icon = "dashboard", ImageSource = "Material", ShowTitle = true })
+local Tab = Window:CreateTab({ Name = "Aiming", Icon = "my_location", ImageSource = "Material", ShowTitle = true })
 Tab:CreateSection("Aimbot")
 
 -- Services
