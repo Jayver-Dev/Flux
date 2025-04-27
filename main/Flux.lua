@@ -1043,7 +1043,7 @@ local function stopFly()
 end
 
 -- 🌙 Luna UI Toggle
-MovementTab:Toggle('Fly (Bypassed)', false, function(state)
+MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
     flyEnabled = state
     if flyEnabled then
         startFly()
