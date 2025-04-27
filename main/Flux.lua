@@ -132,7 +132,7 @@ Tab:CreateToggle({ Name = "Use Mouse Target", CurrentValue = false, Callback = f
 Tab:CreateToggle({ Name = "Show FOV Circle", CurrentValue = false, Callback = function(v) showFOV = v end }, "ShowFOVCircleEnabled")
 
 -- New Feature Toggles
-Tab:CreateToggle({ Name = "Triggerbot", CurrentValue = false, Callback = function(v) triggerbotEnabled = v end }, "TriggerbotEnabled)
+Tab:CreateToggle({ Name = "Triggerbot", CurrentValue = false, Callback = function(v) triggerbotEnabled = v end }, "TriggerbotEnabled")
 Tab:CreateToggle({ Name = "Auto-Wall (Raycast)", CurrentValue = false, Callback = function(v) autowallEnabled = v end }, "Auto-WallEnabled")
 Tab:CreateToggle({ Name = "Recoil Control System", CurrentValue = false, Callback = function(v) recoilControlEnabled = v end }, "RecoilControlSystemEnabledd")
 Tab:CreateToggle({ Name = "Headshot-Only Mode", CurrentValue = false, Callback = function(v) headshotOnly = v end }, "Headshot-OnlyModeEnabled")
@@ -313,7 +313,7 @@ VisualsTab:CreateToggle({ Name = "Draw Boxes", CurrentValue = true, Callback = f
 VisualsTab:CreateToggle({ Name = "Draw Tracers", CurrentValue = true, Callback = function(v) tracerEnabled = v end }, "DrawTracersEnabled")
 VisualsTab:CreateToggle({ Name = "Show Name Tags", CurrentValue = true, Callback = function(v) nameTagEnabled = v end }, "ShowNameTagsEnabled")
 VisualsTab:CreateToggle({ Name = "Show Health Bars", CurrentValue = true, Callback = function(v) healthBarEnabled = v end }, "ShowHealthBarsEnabled")
-VisualsTab:CreateToggle({ Name = "ESP Team Check", CurrentValue = false, Callback = function(v) teamCheckEsp = v end }, "EspTeamCheckEnabled)
+VisualsTab:CreateToggle({ Name = "ESP Team Check", CurrentValue = false, Callback = function(v) teamCheckEsp = v end }, "EspTeamCheckEnabled")
 
 -- ESP Color Picker
 VisualsTab:CreateColorPicker({
@@ -331,7 +331,7 @@ VisualsTab:CreateSlider({
     Range = {50, 1000},
     Increment = 50,
     CurrentValue = 500,
-    Flag, "MaxEspDistance"
+    Flag = "MaxEspDistance",
     Callback = function(val)
         maxDistance = val
     end
