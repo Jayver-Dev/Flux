@@ -58,6 +58,9 @@ fovCircle.Transparency = 0.5
 
 -- Get Best Target
 local function getTarget()
+    local numericAimbotRadius = tonumber(aimbotRadius) or 1000
+    local numericPredictionStrength = tonumber(predictionStrength) or 0
+
     if stickyLock and currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("Humanoid") and currentTarget.Character.Humanoid.Health > 0 then
         return currentTarget
     end
@@ -74,11 +77,11 @@ local function getTarget()
             if not part or hp <= 0 then continue end
             if teamCheck and player.Team == LocalPlayer.Team then continue end
 
-            local predicted = part.Position + (part.Velocity * predictionStrength)
+            local predicted = part.Position + (part.Velocity * numericPredictionStrength)
             local screenPos, onScreen = Camera:WorldToViewportPoint(predicted)
             if onScreen then
                 local distance = (Vector2.new(screenPos.X, screenPos.Y) - ref).Magnitude
-                if aimPriority == "Closest" and distance < bestValue and distance <= aimbotRadius then
+                if aimPriority == "Closest" and distance < bestValue and distance <= numericAimbotRadius then
                     bestTarget = player
                     bestValue = distance
                 elseif aimPriority == "Lowest HP" and hp < bestValue then
@@ -94,6 +97,7 @@ local function getTarget()
     currentTarget = bestTarget
     return bestTarget
 end
+
 
 -- Aimbot + Triggerbot Logic
 RunService.RenderStepped:Connect(function()
