@@ -127,7 +127,7 @@ end)
 -- UI Controls
 Tab:CreateToggle({ Name = "Enable Aimbot", CurrentValue = false, Callback = function(v) aimbotEnabled = v end }, "AimbotEnabled")
 Tab:CreateToggle({ Name = "Sticky Lock", CurrentValue = false, Callback = function(v) stickyLock = v end }, "StickyLockEnabled")
-Tab:CreateToggle({ Name = "Team Check", CurrentValue = false, Callback = function(v) teamCheck = v end }, "TeamCheckEnabled)
+Tab:CreateToggle({ Name = "Team Check", CurrentValue = false, Callback = function(v) teamCheck = v end }, "TeamCheckEnabled")
 Tab:CreateToggle({ Name = "Use Mouse Target", CurrentValue = false, Callback = function(v) useMouseTarget = v end }, "UseMouseTargetEnabled")
 Tab:CreateToggle({ Name = "Show FOV Circle", CurrentValue = false, Callback = function(v) showFOV = v end }, "ShowFOVCircleEnabled")
 
