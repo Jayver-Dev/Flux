@@ -942,7 +942,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
         -- Example: Triggerbot shoots if hit chance is met
         local chance = math.random(1, 100)
         if chance <= getgenv().TriggerbotHitChance then
-            -- shoot (triggerbot activation logic)
+            triggerbotEnabled = true -- shoot (triggerbot activation logic)
         end
     end
 end)
