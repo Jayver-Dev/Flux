@@ -1107,6 +1107,5 @@ MovementTab:CreateSlider({
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
-SettingsTab:BuildThemeSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config
 Luna:LoadAutoloadConfig()
