@@ -1000,11 +1000,11 @@ local function bypassFly(state)
 end
 
 
-local flyToggle = MovementTab:Toggle("Fly(Bypass)", false, function(state)
+local flyToggle = MovementTab:CreateToggle("Fly(Bypass)", false, function(state)
     bypassFly(state)
 end)
 
-local flySpeedSlider = MovementTab:Slider("Fly(bypass) Speed", {
+local flySpeedSlider = MovementTab:CreateSlider("Fly(bypass) Speed", {
     min = 20,
     max = 300,
     default = 80,
