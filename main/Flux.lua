@@ -985,7 +985,7 @@ MovementTab:CreateToggle{
 
 MovementTab:CreateBind{
     Name = "Teleport Key",
-    Default = Enum.KeyCode.T,
+    Default = Enum.KeyCode.LeftControl,
     Callback = function()
         if getgenv().TeleportEnabled then
             local mousePos = game:GetService("Players").LocalPlayer:GetMouse().Hit.Position
