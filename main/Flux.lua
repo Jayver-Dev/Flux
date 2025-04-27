@@ -12,6 +12,12 @@ local Window = Luna:CreateWindow({
     ConfigSettings = { ConfigFolder = "Flux Hub" }
 })
 
+Window:CreateHomeTab({
+	SupportedExecutors = {awp, delta, xeno}, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+	DiscordInvite = "8RetzGPjwA", -- The Discord Invite Link. Do Not Include discord.gg/ | Only Include the code.
+	Icon = 1, -- By Default, The Icon Is The Home Icon. If You would like to change it to dashboard, replace the interger with 2
+})
+
 -- Create Tab
 local Tab = Window:CreateTab({ Name = "Main", Icon = "dashboard", ImageSource = "Material", ShowTitle = true })
 Tab:CreateSection("Aimbot")
