@@ -973,6 +973,7 @@ MovementTab:CreateBind{
 }
 
 local flyEnabled = false
+local flySpeed = 50 -- Default speed
 local bodyGyro, bodyVelocity
 
 local function startFly()
@@ -1025,7 +1026,6 @@ local function startFly()
             moveVec = moveVec.Unit
         end
 
-        local flySpeed = 50 -- Adjust speed
         bodyVelocity.Velocity = moveVec * flySpeed
         bodyGyro.CFrame = camera.CFrame
     end)
@@ -1042,8 +1042,9 @@ local function stopFly()
     end
 end
 
--- 🌙 Luna UI Toggle
-local flybypassed = MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
+-- 🌙 Luna UI Controls
+
+MovementTab:CreateToggle('Fly (Bypassed)', false, function(state)
     flyEnabled = state
     if flyEnabled then
         startFly()
@@ -1051,7 +1052,15 @@ local flybypassed = MovementTab:CreateToggle('Fly (Bypassed)', false, function(s
         stopFly()
     end
 end)
-print("attempting to fly")
+
+MovementTab:CreateSlider('Fly Speed (Bypassed)', {
+    min = 10,
+    max = 150,
+    default = 50,
+}, function(value)
+    flySpeed = value
+end)
+
 
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
