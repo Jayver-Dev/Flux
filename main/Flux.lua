@@ -1029,8 +1029,6 @@ UserInputService.InputEnded:Connect(function(input, processed)
     end
 end)
 
-MovementTab:CreateSection("Bypasses")
-
 --// Luna UI Setup
 MovementTab:CreateToggle({
     Name = "Enable Fly",
