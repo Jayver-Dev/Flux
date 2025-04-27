@@ -13,7 +13,7 @@ local Window = Luna:CreateWindow({
 })
 
 -- Create Tab
-local Tab = Window:CreateTab({ Name = "Main", Icon = "home", ImageSource = "Material", ShowTitle = true })
+local Tab = Window:CreateTab({ Name = "Main", Icon = "work", ImageSource = "Material", ShowTitle = true })
 Tab:CreateSection("Aimbot")
 
 -- Services
