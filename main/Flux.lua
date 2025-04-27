@@ -868,48 +868,6 @@ Tab:CreateSlider{
 }
 
 -- =======================
--- **Visual Tab Additions (Drawing Section)**
--- =======================
-
--- Bullet Tracer Lines
-local bullettracerlines = VisualsTab:CreateToggle({
-    Name = "Bullet Tracer Lines",
-    Default = false,
-    Flag = "BulletTracerLines",
-    Callback = function(Value)
-        getgenv().BulletTracersEnabled = Value
-    end
-})
-
-local bullettracercolorpicker = VisualsTab:CreateColorPicker({
-    Name = "Bullet Tracer Color",
-    Default = Color3.fromRGB(255, 0, 0),
-    Flag = "BulletTracerColor",
-    Callback = function(Value)
-        getgenv().BulletTracerColor = Value
-    end
-})
-
--- Bullet Impact Markers
-local bulletimpactmarkers = VisualsTab:CreateToggle({
-    Name = "Bullet Impact Markers",
-    Default = false,
-    Flag = "BulletImpactMarkers",
-    Callback = function(Value)
-        getgenv().ImpactMarkersEnabled = Value
-    end
-})
-
-local impactmarkercolor = VisualsTab:CreateColorPicker({
-    Name = "Impact Marker Color",
-    Default = Color3.fromRGB(255, 255, 0),
-    Flag = "ImpactMarkerColor",
-    Callback = function(Value)
-        getgenv().ImpactMarkerColor = Value
-    end
-})
-
--- =======================
 -- **Backend Logic**
 -- =======================
 
@@ -947,21 +905,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
--- Bullet Tracer Lines Logic
-game:GetService("RunService").Heartbeat:Connect(function()
-    if getgenv().BulletTracersEnabled then
-        -- Assuming you have logic to track bullet position (shooting)
-        local tracer = Drawing.new("Line")
-        tracer.Color = getgenv().BulletTracerColor
-        tracer.Thickness = 2
-        tracer.From = bulletStart.Position
-        tracer.To = bulletEnd.Position
-        tracer.Visible = true
-        task.delay(0.5, function()
-            tracer:Remove()  -- remove tracer after 0.5 seconds
-        end)
-    end
-end)
 
 -- Variables
 local player = game.Players.LocalPlayer
@@ -974,73 +917,6 @@ local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local mouse = player:GetMouse()
 local bulletRange = 1000 -- Maximum distance for the bullet
-
--- Create an impact marker (for showing where the bullet hits)
-local function createImpactMarker(position)
-    local impactMarker = Instance.new("Part")
-    impactMarker.Shape = Enum.PartType.Ball
-    impactMarker.Size = Vector3.new(0.5, 0.5, 0.5) -- Size of the impact marker
-    impactMarker.Position = position
-    impactMarker.Anchored = true
-    impactMarker.CanCollide = false
-    impactMarker.BrickColor = BrickColor.new("Bright red") -- Color of impact marker
-    impactMarker.Parent = workspace
-    game.Debris:AddItem(impactMarker, 2) -- Clean up after 2 seconds
-end
-
--- Function to calculate and handle bullet impact
-local function fireBullet()
-    local startPosition = camera.CFrame.Position
-    local direction = (mouse.Hit.p - startPosition).unit * bulletRange -- The direction in which the bullet will travel
-    
-    -- Raycast to detect the impact position
-    local ray = Ray.new(startPosition, direction)
-    local hit, position = workspace:FindPartOnRay(ray, player.Character, false, true)
-    
-    if hit then
-        -- If the ray hits something, create an impact marker at the hit position
-        createImpactMarker(position)
-        
-        -- Handle the logic for bullet impact (e.g., apply damage, effects, etc.)
-        print("Bullet hit at position: " .. tostring(position))
-    else
-        print("No hit, bullet traveled to max range.")
-    end
-end
-
--- Simulate firing the bullet when the player clicks the mouse
-mouse.Button1Down:Connect(function()
-    fireBullet()
-end)
-
-
--- Create an impact marker (for showing where the bullet hits)
-local function createImpactMarker(position)
-    local impactMarker = Instance.new("Part")
-    impactMarker.Shape = Enum.PartType.Ball
-    impactMarker.Size = Vector2.new(0.5, 0.5, 0.5) -- Size of the impact marker
-    impactMarker.Position = position
-    impactMarker.Anchored = true
-    impactMarker.CanCollide = false
-    impactMarker.BrickColor = BrickColor.new("Bright red") -- Color of impact marker
-    impactMarker.Parent = workspace
-    game.Debris:AddItem(impactMarker, 2) -- Clean up after 2 seconds
-end
-
--- Bullet Impact Markers Logic
-game:GetService("RunService").Heartbeat:Connect(function()
-    if getgenv().ImpactMarkersEnabled then
-        -- Example impact position (adjust to match your game logic)
-        local marker = Drawing.new("Circle")
-        marker.Color = getgenv().ImpactMarkerColor
-        marker.Position = impactPosition  -- Assuming you have this value
-        marker.Radius = 5
-        marker.Visible = true
-        task.delay(1, function()
-            marker:Remove()  -- remove marker after 1 second
-        end)
-    end
-end)
 
 MovementTab:CreateToggle{
     Name = "Gravity Control",
