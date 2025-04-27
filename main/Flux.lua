@@ -125,17 +125,17 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- UI Controls
-Tab:CreateToggle({ Name = "Enable Aimbot", CurrentValue = false, Callback = function(v) aimbotEnabled = v end })
-Tab:CreateToggle({ Name = "Sticky Lock", CurrentValue = false, Callback = function(v) stickyLock = v end })
-Tab:CreateToggle({ Name = "Team Check", CurrentValue = false, Callback = function(v) teamCheck = v end })
-Tab:CreateToggle({ Name = "Use Mouse Target", CurrentValue = false, Callback = function(v) useMouseTarget = v end })
-Tab:CreateToggle({ Name = "Show FOV Circle", CurrentValue = false, Callback = function(v) showFOV = v end })
+Tab:CreateToggle({ Name = "Enable Aimbot", CurrentValue = false, Callback = function(v) aimbotEnabled = v end }, "AimbotEnabled")
+Tab:CreateToggle({ Name = "Sticky Lock", CurrentValue = false, Callback = function(v) stickyLock = v end }, "StickyLockEnabled")
+Tab:CreateToggle({ Name = "Team Check", CurrentValue = false, Callback = function(v) teamCheck = v end }, "TeamCheckEnabled)
+Tab:CreateToggle({ Name = "Use Mouse Target", CurrentValue = false, Callback = function(v) useMouseTarget = v end }, "UseMouseTargetEnabled")
+Tab:CreateToggle({ Name = "Show FOV Circle", CurrentValue = false, Callback = function(v) showFOV = v end }, "ShowFOVCircleEnabled")
 
 -- New Feature Toggles
-Tab:CreateToggle({ Name = "Triggerbot", CurrentValue = false, Callback = function(v) triggerbotEnabled = v end })
-Tab:CreateToggle({ Name = "Auto-Wall (Raycast)", CurrentValue = false, Callback = function(v) autowallEnabled = v end })
-Tab:CreateToggle({ Name = "Recoil Control System", CurrentValue = false, Callback = function(v) recoilControlEnabled = v end })
-Tab:CreateToggle({ Name = "Headshot-Only Mode", CurrentValue = false, Callback = function(v) headshotOnly = v end })
+Tab:CreateToggle({ Name = "Triggerbot", CurrentValue = false, Callback = function(v) triggerbotEnabled = v end }, "TriggerbotEnabled)
+Tab:CreateToggle({ Name = "Auto-Wall (Raycast)", CurrentValue = false, Callback = function(v) autowallEnabled = v end }, "Auto-WallEnabled")
+Tab:CreateToggle({ Name = "Recoil Control System", CurrentValue = false, Callback = function(v) recoilControlEnabled = v end }, "RecoilControlSystemEnabledd")
+Tab:CreateToggle({ Name = "Headshot-Only Mode", CurrentValue = false, Callback = function(v) headshotOnly = v end }, "Headshot-OnlyModeEnabled")
 
 -- Dropdowns & Sliders
 Tab:CreateDropdown({
@@ -152,14 +152,15 @@ Tab:CreateDropdown({
     Callback = function(opt) targetPart = opt end
 })
 
-Tab:CreateSlider({ Name = "FOV Radius", Range = {50, 500}, Increment = 10, CurrentValue = 100, Callback = function(val) aimbotRadius = val end })
-Tab:CreateSlider({ Name = "Aimbot Smoothness", Range = {1, 10}, Increment = 1, CurrentValue = 5, Callback = function(val) aimSmoothness = val end })
-Tab:CreateSlider({ Name = "Prediction Strength", Range = {0, 0.3}, Increment = 0.005, CurrentValue = 0.165, Callback = function(val) predictionStrength = val end })
+Tab:CreateSlider({ Name = "FOV Radius", Range = {50, 500}, Increment = 10, CurrentValue = 100, Callback = function(val) aimbotRadius = val end }, "FOVRadius")
+Tab:CreateSlider({ Name = "Aimbot Smoothness", Range = {1, 10}, Increment = 1, CurrentValue = 5, Callback = function(val) aimSmoothness = val end }, " AimbotSmoothness")
+Tab:CreateSlider({ Name = "Prediction Strength", Range = {0, 0.3}, Increment = 0.005, CurrentValue = 0.165, Callback = function(val) predictionStrength = val end }, "PredictionStrength")
 
 -- Color Picker
 Tab:CreateColorPicker({
     Name = "FOV Circle Color",
     Default = Color3.fromRGB(255, 0, 0),
+    Flag = "FovCircleColor",
     Callback = function(newColor) fovColor = newColor end
 })
 
@@ -307,17 +308,18 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- UI Toggles
-VisualsTab:CreateToggle({ Name = "Enable ESP", CurrentValue = false, Callback = function(v) espEnabled = v end })
-VisualsTab:CreateToggle({ Name = "Draw Boxes", CurrentValue = true, Callback = function(v) boxEnabled = v end })
-VisualsTab:CreateToggle({ Name = "Draw Tracers", CurrentValue = true, Callback = function(v) tracerEnabled = v end })
-VisualsTab:CreateToggle({ Name = "Show Name Tags", CurrentValue = true, Callback = function(v) nameTagEnabled = v end })
-VisualsTab:CreateToggle({ Name = "Show Health Bars", CurrentValue = true, Callback = function(v) healthBarEnabled = v end })
-VisualsTab:CreateToggle({ Name = "ESP Team Check", CurrentValue = false, Callback = function(v) teamCheckEsp = v end })
+VisualsTab:CreateToggle({ Name = "Enable ESP", CurrentValue = false, Callback = function(v) espEnabled = v end }, "EnabledEsp")
+VisualsTab:CreateToggle({ Name = "Draw Boxes", CurrentValue = true, Callback = function(v) boxEnabled = v end }, "DrawBoxesEnabled")
+VisualsTab:CreateToggle({ Name = "Draw Tracers", CurrentValue = true, Callback = function(v) tracerEnabled = v end }, "DrawTracersEnabled")
+VisualsTab:CreateToggle({ Name = "Show Name Tags", CurrentValue = true, Callback = function(v) nameTagEnabled = v end }, "ShowNameTagsEnabled")
+VisualsTab:CreateToggle({ Name = "Show Health Bars", CurrentValue = true, Callback = function(v) healthBarEnabled = v end }, "ShowHealthBarsEnabled")
+VisualsTab:CreateToggle({ Name = "ESP Team Check", CurrentValue = false, Callback = function(v) teamCheckEsp = v end }, "EspTeamCheckEnabled)
 
 -- ESP Color Picker
 VisualsTab:CreateColorPicker({
     Name = "ESP Color",
     Default = Color3.fromRGB(0, 255, 0),
+    Flag = "EspColor",
     Callback = function(newColor)
         espColor = newColor
     end
@@ -329,6 +331,7 @@ VisualsTab:CreateSlider({
     Range = {50, 1000},
     Increment = 50,
     CurrentValue = 500,
+    Flag, "MaxEspDistance"
     Callback = function(val)
         maxDistance = val
     end
@@ -337,6 +340,7 @@ VisualsTab:CreateSlider({
 VisualsTab:CreateToggle({
     Name = "Sync ESP with Team Color",
     CurrentValue = false,
+    Flag = "SynceEspWithTeamColor",
     Callback = function(v)
         teamColorSync = v
     end
@@ -361,6 +365,7 @@ end)
 VisualsTab:CreateToggle({
     Name = "Third Person View",
     CurrentValue = false,
+    FLag = "ThirdPersonView",
     Callback = function(val)
         thirdPersonEnabled = val
         Camera.CameraType = val and Enum.CameraType.Scriptable or Enum.CameraType.Custom
@@ -448,6 +453,7 @@ end)
 VisualsTab:CreateToggle({
     Name = "Enable Radar",
     CurrentValue = true,
+    Flag = "EnableRadar",
     Callback = function(value)
         radarEnabled = value
     end
@@ -458,6 +464,7 @@ VisualsTab:CreateSlider({
     Range = {100, 300},
     Increment = 10,
     CurrentValue = 150,
+    Flag = "RadarSize",
     Callback = function(value)
         radarSize = value
         radarFrame.Size = Vector2.new(value, value)
@@ -469,6 +476,7 @@ VisualsTab:CreateSlider({
     Range = {100, 1000},
     Increment = 50,
     CurrentValue = 500,
+    Flag = "RadarRange",
     Callback = function(value)
         radarMaxDistance = value
     end
@@ -477,6 +485,7 @@ VisualsTab:CreateSlider({
 VisualsTab:CreateToggle({
     Name = "Radar Team Check",
     CurrentValue = false,
+    Flag = "RadarTeamCheck",
     Callback = function(value)
         radarTeamCheck = value
     end
@@ -594,6 +603,7 @@ end)
 MovementTab:CreateToggle({
     Name = "Flight Mode",
     CurrentValue = false,
+    Flag = "FlightMode",
     Callback = function(v)
         toggleFlightMode()
     end
@@ -604,6 +614,7 @@ MovementTab:CreateSlider({
     Range = {50, 200},
     Increment = 10,
     CurrentValue = flySpeed,
+    Flag = "FlightSpeed",
     Callback = function(val)
         flySpeed = val
     end
@@ -612,6 +623,7 @@ MovementTab:CreateSlider({
 MovementTab:CreateToggle({
     Name = "Noclip",
     CurrentValue = false,
+    Flag = "Noclip",
     Callback = function(v)
         toggleNoclip()
     end
@@ -620,6 +632,7 @@ MovementTab:CreateToggle({
 MovementTab:CreateToggle({
     Name = "Infinite Jump",
     CurrentValue = false,
+    Flag = "InfiniteJump",
     Callback = function(v)
         toggleInfiniteJump()
     end
@@ -634,6 +647,7 @@ MovementTab:CreateSlider({
     Range = {16, 200},
     Increment = 1,
     CurrentValue = currentSpeed,
+    Flag = "WalkSpeed",
     Callback = function(value)
         currentSpeed = value
         local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -651,6 +665,7 @@ MovementTab:CreateSlider({
     Range = {50, 200},
     Increment = 1,
     CurrentValue = currentJumpPower,
+    Flag = "JumpPower",
     Callback = function(value)
         currentJumpPower = value
         local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -760,6 +775,7 @@ Tab:CreateSlider({
     Range = {0, 500},
     Increment = 1,
     CurrentValue = 150,
+    Flag = "SilentAimFov",
     Callback = function(Value)
         SilentAimFOV = Value
     end,
@@ -770,6 +786,7 @@ Tab:CreateSlider({
     Range = {0, 100},
     Increment = 1,
     CurrentValue = 100,
+    Flag = "HitChance%",
     Callback = function(Value)
         SilentAimHitChance = Value
     end,
@@ -779,6 +796,7 @@ Tab:CreateDropdown({
     Name = "Silent Aim Target Part",
     Options = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso"},
     CurrentOption = "Head",
+    Flag = "SilentAimTargetPart",
     Callback = function(Value)
         SilentAimTargetPart = Value
     end,
@@ -787,6 +805,7 @@ Tab:CreateDropdown({
 Tab:CreateToggle({
     Name = "Silent Aim Team Check",
     CurrentValue = true,
+    Flag = "SilentAimTeamCheck",
     Callback = function(Value)
         SilentAimTeamCheck = Value
     end,
@@ -795,6 +814,7 @@ Tab:CreateToggle({
 Tab:CreateToggle({
     Name = "Silent Aim Wall Check",
     CurrentValue = true,
+    Flag = "SilentAimWallCheck",
     Callback = function(Value)
         SilentAimWallCheck = Value
     end,
@@ -808,6 +828,7 @@ Tab:CreateToggle({
 local instanthittoggle = Tab:CreateToggle{
     Name = "Instant Hit",
     Default = false,
+    Flag = "InstantHit",
     Callback = function(Value)
         getgenv().InstantHit = Value
     end
@@ -819,6 +840,7 @@ Tab:CreateSlider{
     Min = 10,
     Max = 500,
     Default = 150,
+    Flag = "SilentAimFovRadius",
     Callback = function(Value)
         getgenv().SilentAimFOV = Value
     end
@@ -828,6 +850,7 @@ Tab:CreateSlider{
 Tab:CreateToggle{
     Name = "Enable Advanced Triggerbot",
     Default = false,
+    Flag = "EnableAdvancedTriggerbot",
     Callback = function(Value)
         getgenv().AdvancedTriggerbotEnabled = Value
     end
@@ -838,6 +861,7 @@ Tab:CreateSlider{
     Min = 1,
     Max = 100,
     Default = 80,
+    Flag = "TriggerbotHitChance%",
     Callback = function(Value)
         getgenv().TriggerbotHitChance = Value
     end
@@ -851,6 +875,7 @@ Tab:CreateSlider{
 local bullettracerlines = VisualsTab:CreateToggle({
     Name = "Bullet Tracer Lines",
     Default = false,
+    Flag = "BulletTracerLines",
     Callback = function(Value)
         getgenv().BulletTracersEnabled = Value
     end
@@ -859,6 +884,7 @@ local bullettracerlines = VisualsTab:CreateToggle({
 local bullettracercolorpicker = VisualsTab:CreateColorPicker({
     Name = "Bullet Tracer Color",
     Default = Color3.fromRGB(255, 0, 0),
+    Flag = "BulletTracerColor",
     Callback = function(Value)
         getgenv().BulletTracerColor = Value
     end
@@ -868,6 +894,7 @@ local bullettracercolorpicker = VisualsTab:CreateColorPicker({
 local bulletimpactmarkers = VisualsTab:CreateToggle({
     Name = "Bullet Impact Markers",
     Default = false,
+    Flag = "BulletImpactMarkers",
     Callback = function(Value)
         getgenv().ImpactMarkersEnabled = Value
     end
@@ -876,6 +903,7 @@ local bulletimpactmarkers = VisualsTab:CreateToggle({
 local impactmarkercolor = VisualsTab:CreateColorPicker({
     Name = "Impact Marker Color",
     Default = Color3.fromRGB(255, 255, 0),
+    Flag = "ImpactMarkerColor",
     Callback = function(Value)
         getgenv().ImpactMarkerColor = Value
     end
@@ -953,6 +981,7 @@ end)
 MovementTab:CreateToggle{
     Name = "Gravity Control",
     Default = false,
+    Flag = "GravityControl",
     Callback = function(Value)
         getgenv().GravityControlEnabled = Value
         if Value then
@@ -968,6 +997,7 @@ MovementTab:CreateSlider{
     Min = 1,
     Max = 50,
     Default = 10,
+    Flag = "GravityStregth",
     Callback = function(Value)
         if getgenv().GravityControlEnabled then
             workspace.Gravity = Value
@@ -978,6 +1008,7 @@ MovementTab:CreateSlider{
 MovementTab:CreateToggle{
     Name = "Enable Teleportation",
     Default = false,
+    Flag = "EnableTeleportation",
     Callback = function(Value)
         getgenv().TeleportEnabled = Value
     end
@@ -986,6 +1017,7 @@ MovementTab:CreateToggle{
 MovementTab:CreateBind{
     Name = "Teleport Key",
     Default = Enum.KeyCode.LeftControl,
+    Flag = "TeleportKey",
     Callback = function()
         if getgenv().TeleportEnabled then
             local mousePos = game:GetService("Players").LocalPlayer:GetMouse().Hit.Position
