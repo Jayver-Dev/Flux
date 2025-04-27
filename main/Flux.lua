@@ -1079,7 +1079,7 @@ local FlySettings = {
     Speed = 100
 }
 
-MovementTab:Toggle({
+MovementTab:CreateToggle({
     Name = "Fly(Bypass)",
     CurrentValue = false,
     Flag = "FlyBypass",
@@ -1089,7 +1089,7 @@ MovementTab:Toggle({
     end
 })
 
-MovementTab:Slider({
+MovementTab:CreateSlider({
     Name = "Fly(Bypass) Speed",
     Range = {50, 1000},
     Increment = 10,
