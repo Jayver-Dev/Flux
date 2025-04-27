@@ -912,71 +912,92 @@ game:GetService("RunService").Heartbeat:Connect(function()
 end)
 
 
--- Variables
-local player = game.Players.LocalPlayer
-local camera = workspace.CurrentCamera
-local mouse = player:GetMouse()
-local bulletRange = 1000 -- Maximum distance for the bullet
-
--- Variables
-local player = game.Players.LocalPlayer
-local camera = workspace.CurrentCamera
-local mouse = player:GetMouse()
-local bulletRange = 1000 -- Maximum distance for the bullet
-
-MovementTab:CreateToggle{
-    Name = "Gravity Control",
-    Default = false,
-    Flag = "GravityControl",
-    Callback = function(Value)
-        getgenv().GravityControlEnabled = Value
-        if Value then
-            workspace.Gravity = 10 -- change this value as needed for a lower gravity
-        else
-            workspace.Gravity = 196.2 -- default gravity
-        end
-    end
-}
-
-MovementTab:CreateSlider{
-    Name = "Gravity Strength",
-    Min = 1,
-    Max = 50,
-    Default = 10,
-    Flag = "GravityStregth",
-    Callback = function(Value)
-        if getgenv().GravityControlEnabled then
-            workspace.Gravity = Value
-        end
-    end
-}
-
-MovementTab:CreateToggle{
-    Name = "Enable Teleportation",
-    Default = false,
-    Flag = "EnableTeleportation",
-    Callback = function(Value)
-        getgenv().TeleportEnabled = Value
-    end
-}
-
-MovementTab:CreateBind{
-    Name = "Teleport Key",
-    Default = Enum.KeyCode.LeftControl,
-    Flag = "TeleportKey",
-    Callback = function()
-        if getgenv().TeleportEnabled then
-            local mousePos = game:GetService("Players").LocalPlayer:GetMouse().Hit.Position
-            game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(mousePos)
-        end
-    end
-}
-
---// Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+local flying = false
+local FlySettings = {
+    Speed = 80,
+    BoostMultiplier = 2,
+    AntiDetection = true, -- if true, randomizes small movements
+}
+
+-- Update when respawning
+LocalPlayer.CharacterAdded:Connect(function(char)
+    Character = char
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+end)
+
+local function bypassFly(state)
+    if state then
+        flying = true
+
+        task.spawn(function()
+            while flying do
+                local moveDirection = Vector3.zero
+                local camera = workspace.CurrentCamera.CFrame
+
+                -- Read movement keys
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection += camera.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection -= camera.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection -= camera.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection += camera.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    moveDirection += Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    moveDirection -= Vector3.new(0, 1, 0)
+                end
+
+                -- Normalize move
+                if moveDirection.Magnitude > 0 then
+                    moveDirection = moveDirection.Unit
+                end
+
+                -- Boost if holding LeftControl
+                local flySpeed = FlySettings.Speed
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    flySpeed *= FlySettings.BoostMultiplier
+                end
+
+                -- Anti detection randomizer
+                if FlySettings.AntiDetection then
+                    local randomize = Vector3.new(
+                        math.random(-2,2) * 0.01,
+                        math.random(-2,2) * 0.01,
+                        math.random(-2,2) * 0.01
+                    )
+                    moveDirection += randomize
+                end
+
+                -- Apply movement
+                if HumanoidRootPart then
+                    HumanoidRootPart.Velocity = moveDirection * flySpeed
+                end
+
+                RunService.RenderStepped:Wait()
+            end
+        end)
+    else
+        flying = false
+        if HumanoidRootPart then
+            HumanoidRootPart.Velocity = Vector3.zero
+        end
+    end
+end
 
 local MovementTab = Window:Tab("Movement", "directions_walk")
 
@@ -984,11 +1005,10 @@ local flyToggle = MovementTab:Toggle("Bypass Fly", false, function(state)
     bypassFly(state)
 end)
 
-local flySpeedSlider = MovementTab:Slider("Fly(Bypass) Speed", {
+local flySpeedSlider = MovementTab:Slider("Fly Speed", {
     min = 20,
     max = 300,
     default = 80,
-    Flag = "BypassFlySpeed",
 }, function(val)
     FlySettings.Speed = val
 end)
