@@ -969,11 +969,56 @@ local camera = workspace.CurrentCamera
 local mouse = player:GetMouse()
 local bulletRange = 1000 -- Maximum distance for the bullet
 
+-- Variables
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local mouse = player:GetMouse()
+local bulletRange = 1000 -- Maximum distance for the bullet
+
 -- Create an impact marker (for showing where the bullet hits)
 local function createImpactMarker(position)
     local impactMarker = Instance.new("Part")
     impactMarker.Shape = Enum.PartType.Ball
     impactMarker.Size = Vector3.new(0.5, 0.5, 0.5) -- Size of the impact marker
+    impactMarker.Position = position
+    impactMarker.Anchored = true
+    impactMarker.CanCollide = false
+    impactMarker.BrickColor = BrickColor.new("Bright red") -- Color of impact marker
+    impactMarker.Parent = workspace
+    game.Debris:AddItem(impactMarker, 2) -- Clean up after 2 seconds
+end
+
+-- Function to calculate and handle bullet impact
+local function fireBullet()
+    local startPosition = camera.CFrame.Position
+    local direction = (mouse.Hit.p - startPosition).unit * bulletRange -- The direction in which the bullet will travel
+    
+    -- Raycast to detect the impact position
+    local ray = Ray.new(startPosition, direction)
+    local hit, position = workspace:FindPartOnRay(ray, player.Character, false, true)
+    
+    if hit then
+        -- If the ray hits something, create an impact marker at the hit position
+        createImpactMarker(position)
+        
+        -- Handle the logic for bullet impact (e.g., apply damage, effects, etc.)
+        print("Bullet hit at position: " .. tostring(position))
+    else
+        print("No hit, bullet traveled to max range.")
+    end
+end
+
+-- Simulate firing the bullet when the player clicks the mouse
+mouse.Button1Down:Connect(function()
+    fireBullet()
+end)
+
+
+-- Create an impact marker (for showing where the bullet hits)
+local function createImpactMarker(position)
+    local impactMarker = Instance.new("Part")
+    impactMarker.Shape = Enum.PartType.Ball
+    impactMarker.Size = Vector2.new(0.5, 0.5, 0.5) -- Size of the impact marker
     impactMarker.Position = position
     impactMarker.Anchored = true
     impactMarker.CanCollide = false
