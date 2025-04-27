@@ -978,168 +978,21 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
---// Variables
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local flyEnabled = false
-local flySpeed = 100
-local maxFlySpeed = 1000
-local speedIncrement = 0.4
-local originalGravity = Workspace.Gravity
-local flyConnection
+local MovementTab = Window:Tab("Movement", "directions_walk")
 
---// Character Respawn Handler
-LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-    Character = newCharacter
-    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local flyToggle = MovementTab:Toggle("Bypass Fly", false, function(state)
+    bypassFly(state)
 end)
 
---// Helper Functions
-local function randomizeValue(value, range)
-    return value + (value * (math.random(-range, range) / 100))
-end
+local flySpeedSlider = MovementTab:Slider("Fly(Bypass) Speed", {
+    min = 20,
+    max = 300,
+    default = 80,
+    Flag = "BypassFlySpeed",
+}, function(val)
+    FlySettings.Speed = val
+end)
 
-local function startFly()
-    if flyConnection then flyConnection:Disconnect() end
-
-    flyConnection = RunService.RenderStepped:Connect(function()
-        if not flyEnabled then return end
-        if not HumanoidRootPart then return end
-
-        local MoveDirection = Vector3.new()
-        local Camera = Workspace.CurrentCamera
-        local CameraCFrame = Camera.CFrame
-
-        -- Controls
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            MoveDirection = MoveDirection + CameraCFrame.LookVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            MoveDirection = MoveDirection - CameraCFrame.LookVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            MoveDirection = MoveDirection - CameraCFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            MoveDirection = MoveDirection + CameraCFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            MoveDirection = MoveDirection + Vector3.new(0, 1, 0)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-            MoveDirection = MoveDirection - Vector3.new(0, 1, 0)
-        end
-
-        if MoveDirection.Magnitude > 0 then
-            flySpeed = math.min(FlySettings.Speed + speedIncrement, maxFlySpeed)
-            MoveDirection = MoveDirection.Unit * math.min(randomizeValue(flySpeed, 10), maxFlySpeed)
-            HumanoidRootPart.Velocity = MoveDirection * 0.5
-        else
-            HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-        end
-    end)
-end
-
-local function stopFly()
-    if flyConnection then
-        flyConnection:Disconnect()
-        flyConnection = nil
-    end
-
-    if HumanoidRootPart then
-        HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-    end
-
-    Workspace.Gravity = originalGravity
-    flySpeed = 100
-end
-
---// Luna UI Toggle Example
-_G.FlyToggle = false
-
-local function toggleFly(state)
-    if state then
-        flying = true
-        workspace.Gravity = 0
-
-        task.spawn(function()
-            while flying do
-                local MoveDirection = Vector3.zero
-                local camera = workspace.CurrentCamera.CFrame
-
-                -- Move based on keys
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                    MoveDirection += camera.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                    MoveDirection -= camera.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                    MoveDirection -= camera.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                    MoveDirection += camera.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                    MoveDirection += Vector3.new(0, 1, 0)
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                    MoveDirection -= Vector3.new(0, 1, 0)
-                end
-
-                -- Normalize movement
-                if MoveDirection.Magnitude > 0 then
-                    MoveDirection = MoveDirection.Unit * FlySettings.Speed
-                end
-
-                -- Apply velocity
-                HumanoidRootPart.Velocity = MoveDirection
-
-                RunService.RenderStepped:Wait()
-            end
-        end)
-    else
-        flying = false
-        workspace.Gravity = originalGravity
-        if HumanoidRootPart then
-            HumanoidRootPart.Velocity = Vector3.zero
-        end
-    end
-end
-
-
---// Example Usage:
--- Connect this function to your Luna UI toggle button:
--- ToggleButton.Callback = function(Value) toggleFly(Value) end
-
-local FlySettings = {
-    Enabled = false,
-    Speed = 100
-}
-
-MovementTab:CreateToggle({
-    Name = "Fly(Bypass)",
-    CurrentValue = false,
-    Flag = "FlyBypass",
-    Callback = function(Value)
-        FlySettings.Enabled = Value
-        toggleFly(Value)
-    end
-})
-
-MovementTab:CreateSlider({
-    Name = "Fly(Bypass) Speed",
-    Range = {50, 1000},
-    Increment = 10,
-    Suffix = "Speed",
-    CurrentValue = 100,
-    Flag = "bypassflyspeed",
-    Callback = function(Value)
-        FlySettings.Speed = Value
-        flySpeed = Value
-    end
-})
 
 
 
