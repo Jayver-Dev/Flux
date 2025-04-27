@@ -1059,16 +1059,55 @@ end
 _G.FlyToggle = false
 
 local function toggleFly(state)
-    _G.FlyToggle = state
-    flyEnabled = state
+    if state then
+        flying = true
+        workspace.Gravity = 0
 
-    if flyEnabled then
-        Workspace.Gravity = 0
-        startFly()
+        task.spawn(function()
+            while flying do
+                local MoveDirection = Vector3.zero
+                local camera = workspace.CurrentCamera.CFrame
+
+                -- Move based on keys
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    MoveDirection += camera.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    MoveDirection -= camera.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    MoveDirection -= camera.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    MoveDirection += camera.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    MoveDirection += Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    MoveDirection -= Vector3.new(0, 1, 0)
+                end
+
+                -- Normalize movement
+                if MoveDirection.Magnitude > 0 then
+                    MoveDirection = MoveDirection.Unit * FlySettings.Speed
+                end
+
+                -- Apply velocity
+                HumanoidRootPart.Velocity = MoveDirection
+
+                RunService.RenderStepped:Wait()
+            end
+        end)
     else
-        stopFly()
+        flying = false
+        workspace.Gravity = originalGravity
+        if HumanoidRootPart then
+            HumanoidRootPart.Velocity = Vector3.zero
+        end
     end
 end
+
 
 --// Example Usage:
 -- Connect this function to your Luna UI toggle button:
