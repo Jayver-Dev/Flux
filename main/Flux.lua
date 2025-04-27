@@ -972,6 +972,87 @@ MovementTab:CreateBind{
     end
 }
 
+local flyEnabled = false
+local bodyGyro, bodyVelocity
+
+local function startFly()
+    local Character = game.Players.LocalPlayer.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local Humanoid = Character and Character:FindFirstChild("Humanoid")
+
+    if not (Character and HumanoidRootPart and Humanoid) then return end
+
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.P = 9e4
+    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+    bodyGyro.CFrame = HumanoidRootPart.CFrame
+    bodyGyro.Parent = HumanoidRootPart
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0,0,0)
+    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+    bodyVelocity.Parent = HumanoidRootPart
+
+    Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if not flyEnabled then return end
+
+        local camera = workspace.CurrentCamera
+        local moveVec = Vector3.zero
+        local UIS = game:GetService("UserInputService")
+
+        if UIS:IsKeyDown(Enum.KeyCode.W) then
+            moveVec += camera.CFrame.LookVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then
+            moveVec -= camera.CFrame.LookVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then
+            moveVec -= camera.CFrame.RightVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then
+            moveVec += camera.CFrame.RightVector
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then
+            moveVec += Vector3.new(0,1,0)
+        end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+            moveVec -= Vector3.new(0,1,0)
+        end
+
+        if moveVec.Magnitude > 0 then
+            moveVec = moveVec.Unit
+        end
+
+        local flySpeed = 50 -- Adjust speed
+        bodyVelocity.Velocity = moveVec * flySpeed
+        bodyGyro.CFrame = camera.CFrame
+    end)
+end
+
+local function stopFly()
+    if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
+
+    local Character = game.Players.LocalPlayer.Character
+    local Humanoid = Character and Character:FindFirstChild("Humanoid")
+    if Humanoid then
+        Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+    end
+end
+
+-- 🌙 Luna UI Toggle
+MovementTab:Toggle('Fly (Bypassed)', false, function(state)
+    flyEnabled = state
+    if flyEnabled then
+        startFly()
+    else
+        stopFly()
+    end
+end)
+
+
 local SettingsTab = Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
