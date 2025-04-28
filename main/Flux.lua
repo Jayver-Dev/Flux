@@ -30,6 +30,7 @@ Tab:CreateSection("Aimbot")
 -- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -1088,7 +1089,6 @@ MovementTab:CreateSection("Bypasses")
 --// Services
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -1247,95 +1247,104 @@ MovementTab:CreateSlider({
 	end,
 })
 
-local Luna = require(game:GetService("ReplicatedStorage"):WaitForChild("Luna"))
+local SettingsTab =
+	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
+
+SettingsTab:CreateSection("Exploiter Detection")
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
 local exploiterDetectionEnabled = false
+local lastPositions = {}
 local detectedPlayers = {}
 
--- Toggle UI
+-- Create Toggle
 local exploitDetectionToggle = SettingsTab:CreateToggle({
 	Name = "Exploiter Detection",
 	Default = false,
-	Tooltip = "Detects other suspicious players locally.",
+	Tooltip = "Detects obvious exploiters (local visible only)",
 	Callback = function(value)
 		exploiterDetectionEnabled = value
 	end,
 })
 
--- Safe Notification
+-- Function to safely send notification with Luna
 local function sendNotification(player, reason, severity)
-	if not detectedPlayers[player] then
-		detectedPlayers[player] = true
+	if not player or not player:IsDescendantOf(Players) then
+		return
+	end -- Ensure player is valid
+	if detectedPlayers[player] then
+		return
+	end -- Skip if already detected
 
-		Luna:Notification({
-			Title = "Possible Exploiter [" .. severity .. "]",
-			Text = player.Name .. " - " .. reason,
-			Duration = 5,
-			Type = (severity == "High" and "Error") or (severity == "Medium" and "Warning") or "Info",
-		})
-	end
+	detectedPlayers[player] = true
+
+	local playerName = player.Name or "Unknown Player"
+	local notifTitle = "Exploiter Spotted [" .. (severity or "Medium") .. "]"
+	local notifText = playerName .. ": " .. (reason or "Suspicious Activity")
+
+	-- Create a Luna notification
+	Luna:Notification({
+		Title = notifTitle,
+		Icon = "warning", -- You can change the icon as you wish
+		ImageSource = "Material", -- You can use a Material icon or other image sources
+		Content = notifText,
+	})
 end
 
--- Exploiter Checker
-local function checkExploiters()
-	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-		if player ~= game.Players.LocalPlayer then
-			local char = player.Character
-			local humanoid = char and char:FindFirstChildWhichIsA("Humanoid")
-			local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+RunService.Heartbeat:Connect(function(deltaTime)
+	if not exploiterDetectionEnabled then
+		return
+	end
 
-			-- Skip if no valid character
-			if not (humanoid and rootPart) then
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer then
+			local character = player.Character
+			local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+
+			-- Ensure all necessary parts exist and are valid
+			if not (humanoid and root) then
 				continue
 			end
 
-			-- Movement Velocity Check
-			if rootPart.Velocity.Magnitude > 120 then
-				sendNotification(player, "Extreme speed detected.", "High")
+			local pos = root.Position
+			local lastPos = lastPositions[player] or pos
+			local moveDistance = (pos - lastPos).Magnitude
+			lastPositions[player] = pos
+
+			-- Flying detection logic:
+			-- 1. Check if the player is "floating" and not falling
+			if
+				humanoid.FloorMaterial == Enum.Material.Air
+				and math.abs(root.Velocity.Y) < 1
+				and root.Velocity.Magnitude < 5
+			then
+				-- This player is not touching the ground and has very little movement speed
+				sendNotification(player, "Floating in mid-air without falling.", "High")
 			end
 
-			-- Floating Without Touching Ground
-			if math.abs(rootPart.Velocity.Y) < 2 and not humanoid.FloorMaterial then
-				sendNotification(player, "Floating without falling.", "Medium")
+			-- 2. Check if the player is constantly above a certain Y threshold (e.g., Y > 5000)
+			if pos.Y > 5000 then
+				sendNotification(player, "Suspiciously high Y-Position (flying or teleporting?).", "High")
 			end
 
-			-- Super Jump
-			if humanoid.JumpPower > 80 then
-				sendNotification(player, "Suspicious jump power.", "Medium")
+			-- 3. Check if the player has a huge movement speed upwards (Velocity)
+			if root.Velocity.Y > 50 then -- velocity check for excessive vertical speed
+				sendNotification(player, "Excessive vertical speed detected (flying).", "High")
 			end
 
-			-- Insane Y Position (Sky TP)
-			if rootPart.Position.Y > 2000 then
-				sendNotification(player, "Sky teleport detected.", "Medium")
-			end
+			-- Optional: Can also check for abnormal movement, like moving faster than a normal player would move
 
-			-- Health Abnormality
-			if humanoid.Health > humanoid.MaxHealth * 2 then
-				sendNotification(player, "Excessive health hack.", "High")
-			end
-
-			-- Size Change Detection
-			if rootPart.Size.Magnitude < 2 or rootPart.Size.Magnitude > 6 then
-				sendNotification(player, "Suspicious body scaling.", "Low")
-			end
-
-			-- Fast Teleport (CFrame Spike)
-			if rootPart.AssemblyLinearVelocity.Magnitude > 200 then
-				sendNotification(player, "Teleport or CFrame abuse.", "High")
+			-- 4. Check for floating with very little movement (no falling, no ground contact)
+			if pos.Y > 2000 and humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+				sendNotification(player, "Player is floating with no clear fall detected.", "Medium")
 			end
 		end
 	end
-end
-
--- Heartbeat Loop
-game:GetService("RunService").Heartbeat:Connect(function()
-	if exploiterDetectionEnabled then
-		pcall(checkExploiters)
-	end
 end)
-
-local SettingsTab =
-	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config
