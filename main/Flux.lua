@@ -18,7 +18,7 @@ local Window = Luna:CreateWindow({
 })
 
 Window:CreateHomeTab({
-	SupportedExecutors = { awp, delta, xeno }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+	SupportedExecutors = { awp, delta, velocity }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
 	DiscordInvite = "8RetzGPjwA", -- The Discord Invite Link. Do Not Include discord.gg/ | Only Include the code.
 	Icon = 1, -- By Default, The Icon Is The Home Icon. If You would like to change it to dashboard, replace the interger with 2
 })
@@ -1250,7 +1250,6 @@ MovementTab:CreateSlider({
 local SettingsTab =
 	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -1259,57 +1258,56 @@ local DetectedPlayers = {}
 local DetectionCooldown = 10 -- seconds before rechecking same player
 
 -- Settings
-local speedThreshold = 150 -- studs/second
+local speedThreshold = 200 -- studs/second
 local flyHeightThreshold = 300 -- Y-studs above ground
 
 local function sendNotification(player, reason, severity, details)
-    if DetectedPlayers[player] and tick() - DetectedPlayers[player] < DetectionCooldown then
-        return
-    end
+	if DetectedPlayers[player] and tick() - DetectedPlayers[player] < DetectionCooldown then
+		return
+	end
 
-    DetectedPlayers[player] = tick()
+	DetectedPlayers[player] = tick()
 
-    Luna:Notification({
-        Title = "Exploiter Spotted [" .. severity .. "]",
-        Icon = "notifications_active",
-        ImageSource = "Material",
-        Content = player.Name .. " flagged for " .. reason .. ". Details: " .. details
-    })
+	Luna:Notification({
+		Title = "Exploiter Spotted [" .. severity .. "]",
+		Icon = "notifications_active",
+		ImageSource = "Material",
+		Content = player.Name .. " flagged for " .. reason .. ". Details: " .. details,
+	})
 end
 
 RunService.Heartbeat:Connect(function(deltaTime)
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local hrp = player.Character.HumanoidRootPart
+			local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
 
-            -- Fly Detection
-            if humanoid and humanoid.FloorMaterial == Enum.Material.Air and hrp.Position.Y > flyHeightThreshold then
-                local heightAboveGround = math.floor(hrp.Position.Y)
-                sendNotification(player, "Flying Detected", "HIGH", "Height: " .. heightAboveGround .. " studs")
-            end
+			-- Fly Detection
+			if humanoid and humanoid.FloorMaterial == Enum.Material.Air and hrp.Position.Y > flyHeightThreshold then
+				local heightAboveGround = math.floor(hrp.Position.Y)
+				sendNotification(player, "Flying Detected", "HIGH", "Height: " .. heightAboveGround .. " studs")
+			end
 
-            -- Speed Detection
-            if not hrp:FindFirstChild("LastPosition") then
-                local lastPos = Instance.new("Vector3Value")
-                lastPos.Name = "LastPosition"
-                lastPos.Value = hrp.Position
-                lastPos.Parent = hrp
-            else
-                local lastPos = hrp:FindFirstChild("LastPosition")
-                local distanceMoved = (hrp.Position - lastPos.Value).Magnitude
-                local speed = distanceMoved / deltaTime
+			-- Speed Detection
+			if not hrp:FindFirstChild("LastPosition") then
+				local lastPos = Instance.new("Vector3Value")
+				lastPos.Name = "LastPosition"
+				lastPos.Value = hrp.Position
+				lastPos.Parent = hrp
+			else
+				local lastPos = hrp:FindFirstChild("LastPosition")
+				local distanceMoved = (hrp.Position - lastPos.Value).Magnitude
+				local speed = distanceMoved / deltaTime
 
-                if speed > speedThreshold then
-                    sendNotification(player, "Speed Hacking", "MEDIUM", "Speed: " .. math.floor(speed) .. " studs/sec")
-                end
+				if speed > speedThreshold then
+					sendNotification(player, "Speed Hacking", "MEDIUM", "Speed: " .. math.floor(speed) .. " studs/sec")
+				end
 
-                lastPos.Value = hrp.Position
-            end
-        end
-    end
+				lastPos.Value = hrp.Position
+			end
+		end
+	end
 end)
-
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config
