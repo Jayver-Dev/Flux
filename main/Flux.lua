@@ -1251,101 +1251,66 @@ local SettingsTab =
 	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
 SettingsTab:CreateSection("Exploiter Detection")
--- Services
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
-local exploiterDetectionEnabled = false
-local lastPositions = {}
-local detectedPlayers = {}
+local DetectedPlayers = {}
+local DetectionCooldown = 10 -- seconds before rechecking same player
 
--- Create Toggle
-local exploitDetectionToggle = SettingsTab:CreateToggle({
-	Name = "Exploiter Detection",
-	Default = false,
-	Tooltip = "Detects obvious exploiters (local visible only)",
-    Flag = "ExploiterDetectionEnabled",
-	Callback = function(value)
-		exploiterDetectionEnabled = value
-	end,
-})
+-- Settings
+local speedThreshold = 50 -- studs/second
+local flyHeightThreshold = 10 -- Y-studs above ground
 
--- Function to safely send notification with Luna
-local function sendNotification(player, reason, severity)
-	if not player or not player:IsDescendantOf(Players) then
-		return
-	end -- Ensure player is valid
-	if detectedPlayers[player] then
-		return
-	end -- Skip if already detected
+local function sendNotification(player, reason, severity, details)
+    if DetectedPlayers[player] and tick() - DetectedPlayers[player] < DetectionCooldown then
+        return
+    end
 
-	detectedPlayers[player] = true
+    DetectedPlayers[player] = tick()
 
-	local playerName = player.Name or "Unknown Player"
-	local notifTitle = "Exploiter Spotted [" .. (severity or "Medium") .. "]"
-	local notifText = playerName .. ": " .. (reason or "Suspicious Activity")
-
-	-- Create a Luna notification
-	Luna:Notification({
-		Title = notifTitle,
-		Icon = "warning", -- You can change the icon as you wish
-		ImageSource = "Material", -- You can use a Material icon or other image sources
-		Content = notifText,
-	})
+    Luna:Notification({
+        Title = "Exploiter Spotted [" .. severity .. "]",
+        Icon = "notifications_active",
+        ImageSource = "Material",
+        Content = player.Name .. " flagged for " .. reason .. ". Details: " .. details
+    })
 end
 
 RunService.Heartbeat:Connect(function(deltaTime)
-	if not exploiterDetectionEnabled then
-		return
-	end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = player.Character.HumanoidRootPart
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
 
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer then
-			local character = player.Character
-			local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
-			local root = character and character:FindFirstChild("HumanoidRootPart")
+            -- Fly Detection
+            if humanoid and humanoid.FloorMaterial == Enum.Material.Air and hrp.Position.Y > flyHeightThreshold then
+                local heightAboveGround = math.floor(hrp.Position.Y)
+                sendNotification(player, "Flying Detected", "HIGH", "Height: " .. heightAboveGround .. " studs")
+            end
 
-			-- Ensure all necessary parts exist and are valid
-			if not (humanoid and root) then
-				continue
-			end
+            -- Speed Detection
+            if not hrp:FindFirstChild("LastPosition") then
+                local lastPos = Instance.new("Vector3Value")
+                lastPos.Name = "LastPosition"
+                lastPos.Value = hrp.Position
+                lastPos.Parent = hrp
+            else
+                local lastPos = hrp:FindFirstChild("LastPosition")
+                local distanceMoved = (hrp.Position - lastPos.Value).Magnitude
+                local speed = distanceMoved / deltaTime
 
-			local pos = root.Position
-			local lastPos = lastPositions[player] or pos
-			local moveDistance = (pos - lastPos).Magnitude
-			lastPositions[player] = pos
+                if speed > speedThreshold then
+                    sendNotification(player, "Speed Hacking", "MEDIUM", "Speed: " .. math.floor(speed) .. " studs/sec")
+                end
 
-			-- Flying detection logic:
-			-- 1. Check if the player is "floating" and not falling
-			if
-				humanoid.FloorMaterial == Enum.Material.Air
-				and math.abs(root.Velocity.Y) < 1
-				and root.Velocity.Magnitude < 5
-			then
-				-- This player is not touching the ground and has very little movement speed
-				sendNotification(player, "Floating in mid-air without falling.", "High")
-			end
-
-			-- 2. Check if the player is constantly above a certain Y threshold (e.g., Y > 5000)
-			if pos.Y > 5000 then
-				sendNotification(player, "Suspiciously high Y-Position (flying or teleporting?).", "High")
-			end
-
-			-- 3. Check if the player has a huge movement speed upwards (Velocity)
-			if root.Velocity.Y > 50 then -- velocity check for excessive vertical speed
-				sendNotification(player, "Excessive vertical speed detected (flying).", "High")
-			end
-
-			-- Optional: Can also check for abnormal movement, like moving faster than a normal player would move
-
-			-- 4. Check for floating with very little movement (no falling, no ground contact)
-			if pos.Y > 2000 and humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
-				sendNotification(player, "Player is floating with no clear fall detected.", "Medium")
-			end
-		end
-	end
+                lastPos.Value = hrp.Position
+            end
+        end
+    end
 end)
+
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config
