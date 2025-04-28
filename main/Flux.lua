@@ -1265,6 +1265,7 @@ local exploitDetectionToggle = SettingsTab:CreateToggle({
 	Name = "Exploiter Detection",
 	Default = false,
 	Tooltip = "Detects obvious exploiters (local visible only)",
+    Flag = "ExploiterDetectionEnabled",
 	Callback = function(value)
 		exploiterDetectionEnabled = value
 	end,
