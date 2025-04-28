@@ -1250,7 +1250,6 @@ MovementTab:CreateSlider({
 local SettingsTab =
 	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
-SettingsTab:CreateSection("Exploiter Detection")
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -1260,8 +1259,8 @@ local DetectedPlayers = {}
 local DetectionCooldown = 10 -- seconds before rechecking same player
 
 -- Settings
-local speedThreshold = 50 -- studs/second
-local flyHeightThreshold = 10 -- Y-studs above ground
+local speedThreshold = 150 -- studs/second
+local flyHeightThreshold = 300 -- Y-studs above ground
 
 local function sendNotification(player, reason, severity, details)
     if DetectedPlayers[player] and tick() - DetectedPlayers[player] < DetectionCooldown then
