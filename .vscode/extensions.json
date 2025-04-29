@@ -1,18 +1,10 @@
 {
     "recommendations": [
-      "sumneko.lua",
-      "JohnnyMorganz.luau-lsp",
-      "evaera.rojo",
-      "esbenp.prettier-vscode",
-      "CoenraadS.bracket-pair-colorizer-2",
+      "johnsoncodehk.stylua",
       "naumovs.color-highlight",
-      "PKief.material-icon-theme",
-      "eamodio.gitlens",
-      "alefragnani.project-manager",
-      "oderwat.indent-rainbow",
-      "zhuangtongfa.material-theme",
-      "GitHub.remotehub",
-      "GitHub.vscode-pull-request-github"
+      "coenraads.bracket-pair-colorizer-2",
+      "christian-kohler.path-intellisense",
+      "formulahendry.auto-close-tag"
     ]
   }
   

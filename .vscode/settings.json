@@ -1,16 +1,9 @@
 {
-    "files.associations": {
-      "*.lua": "lua"
+    // Lua settings for Roblox exploit scripting
+    "Lua.runtime.version": "Lua 5.1",
+    "Lua.runtime.special": {
+      "require": "require"
     },
-    "editor.formatOnSave": true,
-    "editor.tabSize": 4,
-    "editor.detectIndentation": false,
-    "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs": true,
-    "editor.minimap.enabled": true,
-    "workbench.iconTheme": "material-icon-theme",
-    "workbench.colorTheme": "Tokyo Night",
-    "Lua.runtime.version": "LuaJIT",
     "Lua.diagnostics.globals": [
       "game",
       "workspace",
@@ -18,32 +11,75 @@
       "Instance",
       "Vector3",
       "CFrame",
-      "Enum",
-      "UDim2",
       "Ray",
+      "UDim2",
+      "Enum",
+      "Color3",
+      "tick",
       "wait",
       "spawn",
       "delay",
-      "tick",
-      "Time",
-      "UserInputService",
-      "RunService",
+      "print",
+      "warn",
+      "error",
+      "shared",
+      "getfenv",
+      "setfenv",
+      "getgenv",
+      "setgenv",
+      "getrawmetatable",
+      "setreadonly",
+      "newcclosure",
+      "hookfunction",
+      "hookmetamethod",
+      "firetouchinterest",
+      "islclosure",
+      "isreadonly",
+      "Drawing",
+      "RenderStepped",
       "TweenService",
-      "require",
-      "Roact",
-      "Rodux"
+      "Players",
+      "RunService",
+      "HttpService",
+      "LocalPlayer",
+      "UserInputService",
+      "Camera",
+      "loadstring",
+      "mousemoverel",
+      "mouse1click",
+      "mouse1press",
+      "mouse1release",
+      "mouse2click",
+      "mouse2press",
+      "mouse2release"
     ],
-    "Lua.workspace.library": [
-      "${workspaceFolder}/lib",
-      "${workspaceFolder}/modules"
-    ],
-    "Lua.format.defaultConfig": {
-      "indent_style": "space",
-      "indent_size": "4"
-    },
+    "Lua.workspace.library": [],
+    
+    // Format on save (using Stylua)
+    "editor.formatOnSave": true,
+  
+    // Stylua configuration for better Lua code styling
     "stylua.configPath": ".stylua.toml",
-    "git.autofetch": true,
-    "explorer.confirmDragAndDrop": false,
-    "explorer.confirmDelete": false
+  
+    // Bracket Colorizer 2 settings (optional, looks better for nested ESP/Aimbot functions)
+    "bracket-pair-colorizer-2.depreciation-notice": false,
+    "bracket-pair-colorizer-2.colors": [
+      "#FFD700",
+      "#DA70D6",
+      "#00CED1",
+      "#FF4500",
+      "#7CFC00"
+    ],
+    "bracket-pair-colorizer-2.showBracketsInGutter": true,
+    "bracket-pair-colorizer-2.activeScopeCSS": [
+      "borderStyle : solid",
+      "borderWidth : 1px",
+      "borderColor : {color}",
+      "opacity: 0.5"
+    ],
+    
+    // Path Intellisense for faster file requiring
+    "path-intellisense.autoSlashAfterDirectory": true,
+    "path-intellisense.extensionOnImport": true
   }
   
