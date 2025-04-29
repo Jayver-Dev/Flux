@@ -18,7 +18,7 @@ local Window = Luna:CreateWindow({
 })
 
 Window:CreateHomeTab({
-	SupportedExecutors = { awp, delta, xeno }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+	SupportedExecutors = { awp, delta, velocity }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
 	DiscordInvite = "8RetzGPjwA", -- The Discord Invite Link. Do Not Include discord.gg/ | Only Include the code.
 	Icon = 1, -- By Default, The Icon Is The Home Icon. If You would like to change it to dashboard, replace the interger with 2
 })
@@ -30,6 +30,7 @@ Tab:CreateSection("Aimbot")
 -- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -907,7 +908,8 @@ local function UpdateHighlight(target)
 		highlight.FillColor = Color3.fromRGB(255, 0, 0)
 		highlight.FillTransparency = 0.5
 		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-		highlight.OutlineTransparency = 0
+		highlight.OutlineTransparency = 0l
+
 	end
 end
 
@@ -1088,7 +1090,6 @@ MovementTab:CreateSection("Bypasses")
 --// Services
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -1247,95 +1248,133 @@ MovementTab:CreateSlider({
 	end,
 })
 
-local Luna = require(game:GetService("ReplicatedStorage"):WaitForChild("Luna"))
+local SettingsTab =
+	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
 
-local exploiterDetectionEnabled = false
-local detectedPlayers = {}
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
--- Toggle UI
-local exploitDetectionToggle = SettingsTab:CreateToggle({
-	Name = "Exploiter Detection",
-	Default = false,
-	Tooltip = "Detects other suspicious players locally.",
-	Callback = function(value)
-		exploiterDetectionEnabled = value
-	end,
-})
+local DetectedPlayers = {}
+local DetectionCooldown = 10 -- seconds before rechecking same player
 
--- Safe Notification
-local function sendNotification(player, reason, severity)
-	if not detectedPlayers[player] then
-		detectedPlayers[player] = true
+-- Settings
+local speedThreshold = 200 -- studs/second
+local flyHeightThreshold = 300 -- Y-studs above ground
 
-		Luna:Notification({
-			Title = "Possible Exploiter [" .. severity .. "]",
-			Text = player.Name .. " - " .. reason,
-			Duration = 5,
-			Type = (severity == "High" and "Error") or (severity == "Medium" and "Warning") or "Info",
-		})
+local function sendNotification(player, reason, severity, details)
+	if DetectedPlayers[player] and tick() - DetectedPlayers[player] < DetectionCooldown then
+		return
 	end
+
+	DetectedPlayers[player] = tick()
+
+	Luna:Notification({
+		Title = "Exploiter Spotted [" .. severity .. "]",
+		Icon = "notifications_active",
+		ImageSource = "Material",
+		Content = player.Name .. " flagged for " .. reason .. ". Details: " .. details,
+	})
 end
 
--- Exploiter Checker
-local function checkExploiters()
-	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-		if player ~= game.Players.LocalPlayer then
-			local char = player.Character
-			local humanoid = char and char:FindFirstChildWhichIsA("Humanoid")
-			local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+RunService.Heartbeat:Connect(function(deltaTime)
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local hrp = player.Character.HumanoidRootPart
+			local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
 
-			-- Skip if no valid character
-			if not (humanoid and rootPart) then
-				continue
+			-- Fly Detection
+			if humanoid and humanoid.FloorMaterial == Enum.Material.Air and hrp.Position.Y > flyHeightThreshold then
+				local heightAboveGround = math.floor(hrp.Position.Y)
+				sendNotification(player, "Flying Detected", "HIGH", "Height: " .. heightAboveGround .. " studs")
 			end
 
-			-- Movement Velocity Check
-			if rootPart.Velocity.Magnitude > 120 then
-				sendNotification(player, "Extreme speed detected.", "High")
-			end
+			-- Speed Detection
+			if not hrp:FindFirstChild("LastPosition") then
+				local lastPos = Instance.new("Vector3Value")
+				lastPos.Name = "LastPosition"
+				lastPos.Value = hrp.Position
+				lastPos.Parent = hrp
+			else
+				local lastPos = hrp:FindFirstChild("LastPosition")
+				local distanceMoved = (hrp.Position - lastPos.Value).Magnitude
+				local speed = distanceMoved / deltaTime
 
-			-- Floating Without Touching Ground
-			if math.abs(rootPart.Velocity.Y) < 2 and not humanoid.FloorMaterial then
-				sendNotification(player, "Floating without falling.", "Medium")
-			end
+				if speed > speedThreshold then
+					sendNotification(player, "Speed Hacking", "MEDIUM", "Speed: " .. math.floor(speed) .. " studs/sec")
+				end
 
-			-- Super Jump
-			if humanoid.JumpPower > 80 then
-				sendNotification(player, "Suspicious jump power.", "Medium")
-			end
-
-			-- Insane Y Position (Sky TP)
-			if rootPart.Position.Y > 2000 then
-				sendNotification(player, "Sky teleport detected.", "Medium")
-			end
-
-			-- Health Abnormality
-			if humanoid.Health > humanoid.MaxHealth * 2 then
-				sendNotification(player, "Excessive health hack.", "High")
-			end
-
-			-- Size Change Detection
-			if rootPart.Size.Magnitude < 2 or rootPart.Size.Magnitude > 6 then
-				sendNotification(player, "Suspicious body scaling.", "Low")
-			end
-
-			-- Fast Teleport (CFrame Spike)
-			if rootPart.AssemblyLinearVelocity.Magnitude > 200 then
-				sendNotification(player, "Teleport or CFrame abuse.", "High")
+				lastPos.Value = hrp.Position
 			end
 		end
 	end
-end
-
--- Heartbeat Loop
-game:GetService("RunService").Heartbeat:Connect(function()
-	if exploiterDetectionEnabled then
-		pcall(checkExploiters)
-	end
 end)
 
-local SettingsTab =
-	Window:CreateTab({ Name = "Settings", Icon = "settings", ImageSource = "Material", ShowTitle = true })
+SettingsTab:CreateSection("Miscellaneous")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local antiRagdollEnabled = false
+
+local function warnRagdollAttempt(partName)
+        Luna:Notification({
+            Title = "Anti-Ragdoll System",
+            Icon = "warning",
+            ImageSource = "Material",
+            Content = "Blocked ragdoll component: " .. tostring(partName),
+        })
+
+local function removeRagdoll()
+    if not antiRagdollEnabled then return end
+    if not LocalPlayer.Character then return end
+    for _, object in ipairs(LocalPlayer.Character:GetDescendants()) do
+        if object:IsA("BallSocketConstraint") or object:IsA("HingeConstraint") then
+            warnRagdollAttempt(object.Name)
+            object:Destroy()
+        elseif object:IsA("Attachment") and object.Name:lower():find("ragdoll") then
+            warnRagdollAttempt(object.Name)
+            object:Destroy()
+        end
+    end
+end
+
+local function setupAntiRagdoll(character)
+    character:WaitForChild("Humanoid")
+    removeRagdoll()
+    character.DescendantAdded:Connect(function(descendant)
+        if antiRagdollEnabled then
+            if descendant:IsA("BallSocketConstraint") or descendant:IsA("HingeConstraint") then
+                warnRagdollAttempt(descendant.Name)
+                descendant:Destroy()
+            elseif descendant:IsA("Attachment") and descendant.Name:lower():find("ragdoll") then
+                warnRagdollAttempt(descendant.Name)
+                descendant:Destroy()
+            end
+        end
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    setupAntiRagdoll(character)
+end)
+
+if LocalPlayer.Character then
+    setupAntiRagdoll(LocalPlayer.Character)
+end
+
+-- Luna UI Toggle
+SettingsTab:CreateToggle({
+    Name = "Anti-Ragdoll",
+    CurrentValue = antiRagdollEnabled,
+    Callback = function(state)
+        antiRagdollEnabled = state
+        if antiRagdollEnabled then
+            removeRagdoll()
+        end
+    end
+})
+
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config

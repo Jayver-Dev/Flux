@@ -1,1 +1,49 @@
-{}
+{
+    "files.associations": {
+      "*.lua": "lua"
+    },
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.minimap.enabled": true,
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.colorTheme": "Tokyo Night",
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.diagnostics.globals": [
+      "game",
+      "workspace",
+      "script",
+      "Instance",
+      "Vector3",
+      "CFrame",
+      "Enum",
+      "UDim2",
+      "Ray",
+      "wait",
+      "spawn",
+      "delay",
+      "tick",
+      "Time",
+      "UserInputService",
+      "RunService",
+      "TweenService",
+      "require",
+      "Roact",
+      "Rodux"
+    ],
+    "Lua.workspace.library": [
+      "${workspaceFolder}/lib",
+      "${workspaceFolder}/modules"
+    ],
+    "Lua.format.defaultConfig": {
+      "indent_style": "space",
+      "indent_size": "4"
+    },
+    "stylua.configPath": ".stylua.toml",
+    "git.autofetch": true,
+    "explorer.confirmDragAndDrop": false,
+    "explorer.confirmDelete": false
+  }
+  
