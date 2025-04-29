@@ -19,6 +19,7 @@ local Window = Luna:CreateWindow({
 
 Window:CreateHomeTab({
 	SupportedExecutors = { awp, delta, velocity }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+	SupportedExecutors = { awp, delta, velocity }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
 	DiscordInvite = "8RetzGPjwA", -- The Discord Invite Link. Do Not Include discord.gg/ | Only Include the code.
 	Icon = 1, -- By Default, The Icon Is The Home Icon. If You would like to change it to dashboard, replace the interger with 2
 })
@@ -30,6 +31,7 @@ Tab:CreateSection("Aimbot")
 -- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
