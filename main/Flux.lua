@@ -910,7 +910,7 @@ local function UpdateHighlight(target)
 		highlight.FillColor = Color3.fromRGB(255, 0, 0)
 		highlight.FillTransparency = 0.5
 		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-		highlight.OutlineTransparency = 0l
+		highlight.OutlineTransparency = 01
 
 	end
 end
