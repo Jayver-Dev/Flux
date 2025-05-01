@@ -1381,6 +1381,80 @@ SettingsTab:CreateToggle {
   end,
 }
 
+local hitboxEnabled = false
+local hitboxSize = 20
+local hitboxTeamCheck = true
+
+Tab:CreateToggle {
+  Name = 'Hitbox Expander',
+  Default = false,
+  Callback = function(value)
+    hitboxEnabled = value
+  end,
+}
+
+Tab:CreateToggle {
+  Name = 'Hitbox Team Check',
+  Default = true,
+  Callback = function(value)
+    hitboxTeamCheck = value
+  end,
+}
+
+Tab:CreateSlider {
+  Name = 'Hitbox Size',
+  Min = 5,
+  Max = 50,
+  Default = 20,
+  Increment = 1,
+  Callback = function(value)
+    hitboxSize = value
+  end,
+}
+
+local originalSizes = {}
+
+RunService.RenderStepped:Connect(function()
+  if hitboxEnabled then
+    for _, player in pairs(Players:GetPlayers()) do
+      if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild 'Head' then
+        if hitboxTeamCheck and player.Team == LocalPlayer.Team then
+          continue
+        end
+
+        local hrp = player.Character.HumanoidRootPart
+        pcall(function()
+          -- Save original size once
+          if not originalSizes[player] then
+            originalSizes[player] = hrp.Size
+          end
+
+          hrp.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
+          hrp.Transparency = 0.7
+          hrp.Material = Enum.Material.Neon
+          hrp.BrickColor = BrickColor.new 'Really red'
+          hrp.CanCollide = false
+        end)
+      end
+    end
+  else
+    -- Reset hitboxes
+    for _, player in pairs(Players:GetPlayers()) do
+      local hrp = player.Character and player.Character:FindFirstChild 'Head'
+      if hrp and originalSizes[player] then
+        pcall(function()
+          hrp.Size = originalSizes[player]
+          hrp.Transparency = 0
+          hrp.Material = Enum.Material.Plastic
+          hrp.BrickColor = BrickColor.new 'Medium stone grey'
+          hrp.CanCollide = true
+        end)
+        originalSizes[player] = nil
+      end
+    end
+  end
+end)
+
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config
 Luna:LoadAutoloadConfig()
