@@ -17,9 +17,8 @@ local Window = Luna:CreateWindow {
   ConfigSettings = { ConfigFolder = 'Flux' },
 }
 
-Window:CreateHomeTab {
-  SupportedExecutors = { awp, delta, velocity }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
-  SupportedExecutors = { awp, delta, velocity, visual }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+Window:CreateHomeTab { -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
+  SupportedExecutors = { AWP, Delta, Velocity, Zenith }, -- A Table Of Executors Your Script Supports. Add strings of the executor names for each executor.
   DiscordInvite = '8RetzGPjwA', -- The Discord Invite Link. Do Not Include discord.gg/ | Only Include the code.
   Icon = 1, -- By Default, The Icon Is The Home Icon. If You would like to change it to dashboard, replace the interger with 2
 }
@@ -1454,6 +1453,58 @@ RunService.RenderStepped:Connect(function()
     end
   end
 end)
+
+local crosshairEnabled = false
+local crosshairId = "rbxassetid://9943168537"
+
+local presetCrosshairs = {
+    ["Red Dot"] = "rbxassetid://17797747635",
+    ["Green Dot"] = "rbxassetid://11329293521",
+    ["Angle"] = "rbxassetid://18932934463",
+    ["Heart"] = "rbxassetid://13318885193",
+    ["Circle"] = "rbxassetid://17459159263"
+}
+
+local function updateCrosshair()
+    LocalPlayer:GetMouse().Icon = crosshairEnabled and crosshairId or ""
+end
+
+VisualsTab:CreateToggle({
+    Name = "Enable Custom Crosshair",
+    CurrentValue = false,
+    Flag = "CustomCrosshairEnabled",
+    Callback = function(state)
+        crosshairEnabled = state
+        updateCrosshair()
+    end
+})
+
+VisualsTab:CreateInput({
+    Name = "Custom Crosshair ID",
+    Description = "use TEXTURE ID not ASSET ID",
+    PlaceholderText = "Enter Texture ID",
+    RemoveTextAfterFocusLost = false,
+    FLag = "CustomCrosshairID",
+    Callback = function(input)
+        if input and tonumber(input) then
+            local assetId = "rbxassetid://" .. input
+            UserInputService.MouseIcon = assetId
+        else
+            warn("Invalid input: must be a numeric ID")
+        end
+    end
+})
+
+VisualsTab:CreateDropdown({
+    Name = "Preset Crosshairs",
+    Options = { "Red Dot", "Green Dot", "Angle", "Heart", "Circle" },
+    CurrentOption = "Red Dot",
+    Callback = function(option)
+        crosshairId = presetCrosshairs[option]
+        updateCrosshair()
+    end
+})
+
 
 SettingsTab:BuildConfigSection() -- Tab Should be the name of the tab you are adding this section to.
 -- Load config
