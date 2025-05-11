@@ -220,46 +220,49 @@ AimbotBox:AddToggle( "Headshot-Only Mode", {
 }, 'Headshot-OnlyModeEnabled')
 
 -- Dropdowns & Sliders
-Main:AddDropdown ( "Aim Priority", {
+AimbotBox:AddDropdown ( "Aim Priority", {
   Text = 'Aim Priority',
-  Options = { 'Closest', 'Lowest HP', 'Random' },
+  Values = { 'Closest', 'Lowest HP', 'Random' },
   Default = 1,
   Callback = function(opt)
     aimPriority = opt
   end,
 })
 
-Main:AddDropdown ( "Target Part", {
+AimbotBox:AddDropdown ( "Target Part", {
   Text = 'Target Bone',
-  Options = { 'Head', 'HumanoidRootPart' },
+  Values = { 'Head', 'HumanoidRootPart' },
   Default = 1,
   Callback = function(opt)
     targetPart = opt
   end,
 })
 
-Main:AddSlider( "FOV Radius",{
+AimbotBox:AddSlider( "FOV Radius",{
   Text = 'FOV Radius',
-  Range = { 50, 500 },
-  Increment = 10,
+  Min = 50,
+  Max = 500,
+  Rounding = 1,
   Default = 100,
   Callback = function(val)
     aimbotRadius = val
   end,
 }, 'FOVRadius')
-Main:AddSlider( "FOV Circle Thickness",{0
+AimbotBox:AddSlider( "FOV Circle Thickness",{
   Text = 'Aimbot Smoothness',
-  Range = { 1, 10 },
-  Increment = 1,
+  Min = 1,
+  Max = 10,
+  Rounding = 1,,
   Default = 5,
   Callback = function(val)
     aimSmoothness = val
   end,
 }, ' AimbotSmoothness')
-Main:AddSlider( "Prediction Strength",{
+AimbotBox:AddSlider( "Prediction Strength",{
   Text = 'Prediction Strength',
-  Range = { 0, 0.3 },
-  Increment = 0.005,
+  Min = 0,
+  Max = 0.3,
+  Rounding = 1,
   Default = 0.165,
   Callback = function(val)
     predictionStrength = val
@@ -267,7 +270,7 @@ Main:AddSlider( "Prediction Strength",{
 }, 'PredictionStrength')
 
 -- Color Picker
-Main:AddColorPicker ( "FOV Circle Color",{
+AimbotBox:AddColorPicker ( "FOV Circle Color",{
   Text = 'FOV Circle Color',
   Default = Color3.fromRGB(255, 0, 0),
   Flag = 'FovCircleColor',
@@ -430,7 +433,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- UI Toggles
-EspBox:AddToggle( ""Enable ESP", {
+EspBox:AddToggle( "Enable ESP", {
   Text = 'Enable ESP',
   Default = false,
   Callback = function(v)
@@ -486,8 +489,9 @@ EspBox:AddColorPicker( "ESP Color", {
 -- Max Distance Slider
 EspBox:AddSlider( "Max ESP Distance", {
   Text = 'Max ESP Distance',
-  Range = { 50, 1000 },
-  Increment = 50,
+  Min = 50,
+  Max = 1000,
+  Rounding = 1,
   Default = 500,
   Flag = 'MaxEspDistance',
   Callback = function(val)
@@ -528,7 +532,7 @@ EspBox:AddToggle( "Third Person View", {
     thirdPersonEnabled = val
     Camera.CameraType = val and Enum.CameraType.Scriptable or Enum.CameraType.Custom
   end,
-}
+})
 
 -- Radar Configuration
 local radarEnabled = true
@@ -624,8 +628,9 @@ EspBox:AddToggle( "Enable Radar", {
 
 EspBox:AddSlider( "Radar Size", {
   Text = 'Radar Size',
-  Range = { 100, 300 },
-  Increment = 10,
+  Min = 100,
+  Max = 300,
+  Rounding = 1,
   Default = 150,
   Flag = 'RadarSize',
   Callback = function(value)
@@ -636,8 +641,9 @@ EspBox:AddSlider( "Radar Size", {
 
 EspBox:AddSlider( "Radar Range", {
   Text = 'Radar Range',
-  Range = { 100, 1000 },
-  Increment = 50,
+  Min = 100,
+  Max = 1000,
+  Rounding = 1,
   Default = 500,
   Flag = 'RadarRange',
   Callback = function(value)
@@ -779,8 +785,9 @@ MovementBox:AddToggle( "Enable Flight", {
 
 MovementBox:AddSlider( "Flight Speed", {
   Text = 'Flight Speed',
-  Range = { 50, 200 },
-  Increment = 10,
+  Min = 50,
+  Max = 200,
+  Rounding = 1,
   Default = flySpeed,
   Flag = 'FlightSpeed',
   Callback = function(val)
@@ -811,8 +818,9 @@ local currentSpeed = 16
 
 MovementBox:AddSlider( "Walk Speed", {
   Text = 'Walk Speed',
-  Range = { 16, 200 },
-  Increment = 1,
+  Min = 16,
+  Max = 200,
+  Rounding = 1,
   Default = currentSpeed,
   Flag = 'WalkSpeed',
   Callback = function(value)
@@ -829,8 +837,9 @@ local currentJumpPower = 50
 
 MovementBox:AddSlider( "Jump Power", {
   Text = 'Jump Power',
-  Range = { 50, 200 },
-  Increment = 1,
+  Min = 50,
+  Max = 200,
+  Rounding = 1,
   Default = currentJumpPower,
   Flag = 'JumpPower',
   Callback = function(value)
@@ -950,8 +959,9 @@ AimbotBox2:AddToggle( "Enable Silent Aim", {
 
 AimbotBox2:AddSlider( "Silent Aim FOV", {
   Text = 'Silent Aim FOV',
-  Range = { 0, 500 },
-  Increment = 1,
+  Min = 0,
+  Max = 500,
+  Rounding = 1,
   Default = 150,
   Flag = 'SilentAimFov',
   Callback = function(Value)
@@ -961,8 +971,9 @@ AimbotBox2:AddSlider( "Silent Aim FOV", {
 
 AimbotBox2:AddSlider( "Hit Chance", {
   Text = 'Hit Chance %',
-  Range = { 0, 100 },
-  Increment = 1,
+  Min = 0,
+  Max = 100,
+  Rounding = 1,
   Default = 100,
   Flag = 'HitChance%',
   Callback = function(Value)
@@ -972,7 +983,7 @@ AimbotBox2:AddSlider( "Hit Chance", {
 
 AimbotBox2:AddDropdown( "Aim Target", {
   Text = 'Silent Aim Target Part',
-  Options = { 'Head', 'HumanoidRootPart', 'UpperTorso', 'LowerTorso' },
+  Values = { 'Head', 'HumanoidRootPart', 'UpperTorso', 'LowerTorso' },
   Default = 1,
   Flag = 'SilentAimTargetPart',
   Callback = function(Value)
@@ -1226,8 +1237,9 @@ MovementBox2:AddToggle( "Enable Hover", {
 
 MovementBox2:AddSlider( "Fly Speed", {
   Text = 'Fly Speed',
-  Range = { 1, 20 },
-  Increment = 1,
+  Min = 1,
+  Max = 20,
+  Rounding = 1,
   Default = flySpeed,
   Suffix = ' Studs/s',
   Callback = function(Value)
@@ -1237,7 +1249,8 @@ MovementBox2:AddSlider( "Fly Speed", {
 
 MovementBox2:AddSlider( "Hover Intensity", {
   Text = 'Hover Intensity',
-  Range = { 0, 5 },
+  Min = 0,
+  Max = 5,
   Increment = 0.1,
   Default = hoverIntensity,
   Suffix = '',
@@ -1374,7 +1387,7 @@ SettingsTab:AddToggle( "Enable Anti-Ragdoll", {
       removeRagdoll()
     end
   end,
-}
+})
 
 local hitboxEnabled = false
 local hitboxSize = 20
@@ -1401,7 +1414,7 @@ AimbotBox:AddSlider("Hitbox Size", {
   Min = 5,
   Max = 50,
   Default = 20,
-  Increment = 1,
+  Rounding = 1,
   Callback = function(value)
     hitboxSize = value
   end,
@@ -1495,7 +1508,7 @@ EspBox2:AddInput( "CustomCrosshairID",{
 
 EspBox2:AddDropdown( "Preset Crosshairs", {
     Text = "Preset Crosshairs",
-    Options = { "Red Dot", "Green Dot", "Angle", "Heart", "Circle" },
+    Values = { "Red Dot", "Green Dot", "Angle", "Heart", "Circle" },
     Default = 1,
     Callback = function(option)
         crosshairId = presetCrosshairs[option]
