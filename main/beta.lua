@@ -1504,8 +1504,23 @@ EspBox2:AddDropdown( "Preset Crosshairs", {
 })
 
 
+
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
+SaveManager:IgnoreThemeSettings()
+
+
+SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
+
+
+ThemeManager:SetFolder('Flux/V2')
+SaveManager:SetFolder('Flux/V2')
+
 SaveManager:BuildConfigSection(Tabs.Settings)
+
+
 ThemeManager:ApplyToTab(Tabs.Settings)
+
+
+SaveManager:LoadAutoloadConfig()
