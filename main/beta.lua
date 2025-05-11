@@ -223,7 +223,7 @@ AimbotBox:AddToggle( "Headshot-Only Mode", {
 Main:AddDropdown ( "Aim Priority", {
   Text = 'Aim Priority',
   Options = { 'Closest', 'Lowest HP', 'Random' },
-  CurrentOption = 'Closest',
+  Default = 1,
   Callback = function(opt)
     aimPriority = opt
   end,
@@ -232,7 +232,7 @@ Main:AddDropdown ( "Aim Priority", {
 Main:AddDropdown ( "Target Part", {
   Text = 'Target Bone',
   Options = { 'Head', 'HumanoidRootPart' },
-  CurrentOption = 'HumanoidRootPart',
+  Default = 1,
   Callback = function(opt)
     targetPart = opt
   end,
@@ -973,7 +973,7 @@ AimbotBox2:AddSlider( "Hit Chance", {
 AimbotBox2:AddDropdown( "Aim Target", {
   Text = 'Silent Aim Target Part',
   Options = { 'Head', 'HumanoidRootPart', 'UpperTorso', 'LowerTorso' },
-  CurrentOption = 'Head',
+  Default = 1,
   Flag = 'SilentAimTargetPart',
   Callback = function(Value)
     SilentAimTargetPart = Value
@@ -1496,7 +1496,7 @@ EspBox2:AddInput( "CustomCrosshairID",{
 EspBox2:AddDropdown( "Preset Crosshairs", {
     Text = "Preset Crosshairs",
     Options = { "Red Dot", "Green Dot", "Angle", "Heart", "Circle" },
-    CurrentOption = "Red Dot",
+    Default = 1,
     Callback = function(option)
         crosshairId = presetCrosshairs[option]
         updateCrosshair()
