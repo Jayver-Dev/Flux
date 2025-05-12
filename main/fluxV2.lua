@@ -2,7 +2,7 @@ local libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/imagoo
 local NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/imagoodpersond/puppyware/main/notify"))()
 local Notify = NotifyLibrary.Notify
 
-local Window = libary:new({ name = "Flux V2", accent = Color3.fromRGB(93, 223, 255), namesize = 13 })
+local Window = libary:new({ name = "Flux V2 on even more crack!", accent = Color3.fromRGB(93, 223, 255), namesize = 13 })
 makefolder("FluxV2")
 
 local Main = Window:page({ Name = "Main" })
