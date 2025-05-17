@@ -1368,7 +1368,7 @@ MiscTab:toggle({
 		end,
 	})
 
-	MiscTab:toggle("Hitbox Team Check", {
+	MiscTab:toggle({
 		name = "Hitbox Team Check",
 		def = true,
 		Callback = function(value)
